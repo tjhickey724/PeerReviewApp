@@ -205,6 +205,17 @@ app.get('/showProblem/:probId',
       answerController.getProblem,
       (req,res) => res.render("showProblem",{probId:req.params.probId})
     )
+
+/*
+app.get('/editProblem/:probId',
+    answerController.getAnswer,
+    answerController.getProblem,
+    problemController.getProblemSet,
+    problemController.getClassInfo,
+    (req,res) => res.render("editProblem",{probId:req.params.probId})
+  )
+*/
+
 app.post('/saveAnswer/:probId',
       answerController.getProblem,
       answerController.saveAnswer,
