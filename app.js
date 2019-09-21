@@ -195,8 +195,9 @@ app.get('/addProblem/:psetId',
     )
 
 app.post('/saveProblem/:psetId',
-      problemSetController.saveProblem,
       problemSetController.getProblemSet,
+      problemSetController.getClassInfo,
+      problemSetController.saveProblem,
       problemSetController.getProblems,
       (req,res) => res.render("showProblemSet")
     )

@@ -117,7 +117,8 @@ exports.saveProblem = ( req, res, next ) => {
   console.log("psetId = "+psetId)
   let newProblem = new Problem(
    {
-    psetId: psetId,
+    classId: res.locals.problemSet.classId,
+    psetId: res.locals.problemSet._id,
     description: req.body.description,
     problemText: req.body.problemText,
     points: req.body.points,

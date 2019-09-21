@@ -2,6 +2,7 @@
 const Class = require( '../models/Class' );
 const ClassMember = require( '../models/ClassMember' );
 
+
 exports.createClass = ( req, res, next ) => {
   //console.log("in saveSkill!")
   console.log("in createClass.... req.user=")
@@ -30,9 +31,10 @@ exports.createClass = ( req, res, next ) => {
 };
 
 
-// this displays all of the skills
+// this gets all of the classId's
+// for classes that a student is enrolled in
 exports.getRegistrations = ( req, res, next ) => {
-  //gconsle.log('in getAllSkills')
+
   if (!req.user) next()
 
   ClassMember.find({studentId:req.user._id})
@@ -50,9 +52,10 @@ exports.getRegistrations = ( req, res, next ) => {
 
 
 
-// this displays all of the skills
+// this finds all of the classId's
+// for classes that the user is taking
 exports.getClassesYouTake = ( req, res, next ) => {
-  //gconsle.log('in getAllSkills')
+
   if (!req.user) next()
 
   Class.find({_id:{$in:res.locals.registeredClasses}})
@@ -69,9 +72,10 @@ exports.getClassesYouTake = ( req, res, next ) => {
 };
 
 
-// this displays all of the skills
+// this gets all classId's
+// for classes owned by the user
 exports.getClassesYouOwn = ( req, res, next ) => {
-  //gconsle.log('in getAllSkills')
+
   if (!req.user) next()
 
   Class.find({ownerId:req.user._id})
@@ -81,15 +85,17 @@ exports.getClassesYouOwn = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getAllYourClasses: "+ error.message );
+      console.log("Error in getClassesYouOwn: "+ error.message );
       res.send(error)
     } )
 
 };
 
-// this displays all of the skills
+// This takes the classId param
+// and uses it to find the classInfo
+// which it adds to the res.locals
 exports.addClassInfo = ( req, res, next ) => {
-  //gconsle.log('in getAllSkills')
+
   const id = req.params.classId
   console.log('the id is '+id)
   Class.findOne({_id:id})
@@ -105,11 +111,10 @@ exports.addClassInfo = ( req, res, next ) => {
 
 };
 
-
+// this uses the classPin parameter
+// to lookup the corresponding class
+// and add the classInfo to res.locals
 exports.addClassFromPin = ( req, res, next ) => {
-  //console.log("in saveSkill!")
-  console.log("in addClass.... req.user._id=")
-  console.log(req.user._id)
   let classPin = req.body.classPin
 
   Class.findOne({classPin:classPin})
@@ -126,9 +131,10 @@ exports.addClassFromPin = ( req, res, next ) => {
 
 };
 
+// this checks to see if the user is enrolled
+// in the current class (res.locals.classInfo)
+// and adds the boolean isEnrolled to res.locals
 exports.checkEnrollment = ( req, res, next ) => {
-
-
   ClassMember.find({studentId:req.user._id,classId:res.locals.classInfo._id})
     .exec()
     .then( memberList => {
@@ -142,8 +148,10 @@ exports.checkEnrollment = ( req, res, next ) => {
 
 };
 
+// this adds the current user to the curent class
+// assuming res.locals.classInfo has been set
 exports.joinClass = ( req, res, next ) => {
-  //console.log("in saveSkill!")
+
   let registration =
     {
       studentId: res.locals.user._id,

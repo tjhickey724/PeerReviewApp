@@ -7,11 +7,13 @@ const Review = require('../models/Review')
 
 exports.saveAnswer = ( req, res, next ) => {
   const problemId = req.params.probId
+  const problem = res.locals.problem
   let newAnswer = new Answer(
    {
-    name: req.body.name,
     studentId:req.user._id,
-    problemId:problemId,
+    classId:problem.classId,
+    psetId:problem.psetId,
+    problemId:problem._id,
     answer:req.body.answer,
     createdAt: new Date()
    }
@@ -76,11 +78,14 @@ exports.getProblem = ( req, res, next ) => {
 exports.saveReview = ( req, res, next ) => {
   const problemId = req.params.probId
   const answerId = req.params.answerId
+  const problem = res.locals.problem
   let newReview = new Review(
    {
     reviewerId:req.user._id,
+    classId:problem.classId,
+    psetId:problem.psetId,
+    problemId:problem._id,
     answerId:answerId,
-    problemId:problemId,
     review:req.body.review,
     points:req.body.points,
     createdAt: new Date()
