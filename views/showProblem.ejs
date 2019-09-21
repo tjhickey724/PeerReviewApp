@@ -1,0 +1,27 @@
+<%- include('bootheader') -%>
+<%- include('menubar') -%>
+
+    <h3><%= problem.description %></h3>
+    <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
+    <hr>
+    <% if (answered) { %>
+            <h2>Your Answer</h2>
+            <small>Submission time and date:<%= problem.createdAt %> </small>
+            <pre class="bg-success      "><%= answer.answer %></pre>
+            <br>
+            <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-info">Review others answers</a>
+            <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
+
+    <% } else { %>
+            <form method="post" action="/saveAnswer/<%= problem._id %>">
+                    <div class="form-group">
+                        <label for="answer">Enter your answer below:</label>
+                        <textarea class="form-control rounded-0" id="answer" name="answer" rows="10"></textarea>
+                    </div>
+                    <br>
+                    <input class="btn btn-lg btn-warning" type="submit">
+            </form>
+    <% } %>
+
+
+<%- include('bootfooter') -%>

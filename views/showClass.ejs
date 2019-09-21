@@ -1,0 +1,37 @@
+<%- include('bootheader') -%>
+<%- include('menubar') -%>
+    <h1><%= classInfo.name %></h1>
+    Student PIN <%= classInfo.classPin  %>
+
+
+<hr>
+<b>Problem Sets</b>
+    <ul>
+    <% for(i = 0; i<= problemSets.length-1; i++){  %>
+        <li>
+
+            <a href="/showProblemSet/<%= problemSets[i]._id %>">
+                <%= problemSets[i].name %>
+            </a>
+                <i><small><%= problemSets[i].createdAt %></small></i>
+        </li>
+    <% } %>
+    </ul>
+<hr>
+    <% if (user._id.equals(classInfo.ownerId)) { %>
+        <a href="/addProblemSet/<%= classInfo._id %>" class="btn btn-sm btn-danger">
+            Add Problem Set
+        </a>
+        <a href="/showStudentInfo/<%= classInfo._id %>" class="btn btn-sm btn-danger">
+            Show Student Info
+        </a>
+    <% } else { %>
+
+    <%} %>
+
+    <a href="/" class="btn btn-sm btn-danger">
+        Back to Home
+    </a>
+
+
+<%- include('bootfooter') -%>
