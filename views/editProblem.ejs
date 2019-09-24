@@ -1,10 +1,13 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
+  <% if (!course.ownerId.equals(user._id)) { %>
+      You must own the course to edit the problems
+  <% } else { %>
     <div class="jumbotron">
         <h1>Edit Problem</h1>
     </div>
 
-    <form method="post" action="/updateProblem/<%= psetId %>">
+    <form method="post" action="/updateProblem/<%= problem._id %>">
         Problem Title:<br>
         <input type="text" name="description" value="<%= problem.description %>">
         <br>
@@ -18,7 +21,6 @@
         <input class="btn btn-lg btn-primary" type="submit">
     </form>
 
-    <%= psetId %>
-
+  <% } %>
 
 <%- include('bootfooter') -%>

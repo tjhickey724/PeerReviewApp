@@ -26,6 +26,7 @@ db.once('open', function() {
 
 const classController = require('./controllers/classController')
 const problemSetController = require('./controllers/problemSetController')
+const problemController = require('./controllers/problemController')
 const answerController = require('./controllers/answerController')
 
 // Authentication
@@ -201,21 +202,29 @@ app.post('/saveProblem/:psetId',
       problemSetController.getProblems,
       (req,res) => res.render("showProblemSet")
     )
+app.post('/updateProblem/:probId',
+    problemController.getProblemP,
+    problemController.getCourseL,
+    answerController.getAnswer,
+    problemController.updateProblemLB,
+    answerController.getProblem,
+    //problemController.getProblemSetL,
+    //problemSetController.getProblems,
+    (req,res) => res.render("showProblem",{probId:req.params.probId})
+  )
 app.get('/showProblem/:probId',
       answerController.getAnswer,
       answerController.getProblem,
+      problemController.getCourseL,
       (req,res) => res.render("showProblem",{probId:req.params.probId})
     )
 
-/*
 app.get('/editProblem/:probId',
-    answerController.getAnswer,
-    answerController.getProblem,
-    problemController.getProblemSet,
-    problemController.getClassInfo,
+    problemController.getProblemP,
+    problemController.getCourseL,
     (req,res) => res.render("editProblem",{probId:req.params.probId})
   )
-*/
+
 
 app.post('/saveAnswer/:probId',
       answerController.getProblem,
