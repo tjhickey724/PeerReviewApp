@@ -3,11 +3,22 @@
 
     <h3><%= problem.description %></h3>
     <% if (course.ownerId.equals(user._id)) { %>
-        <a href="/editProblem/<%= problem._id %>"
-           class="btn btn-sm btn-info">
-             Edit
-        </a>
+        <div class="row">
+            <div class="col-md">
+                Answers: <%= answerCount %>
+            </div>
+            <div class="col-md">
+                Reviews: <%= reviewCount %>
+            </div>
+            <div class="col-md text-right">
+                <a href="/editProblem/<%= problem._id %>"
+                   class="btn btn-sm btn-info">
+                     Edit
+                </a>
+            </div>
+        </div>
     <% } %>
+
 
     <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
     <hr>

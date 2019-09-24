@@ -215,6 +215,8 @@ app.post('/updateProblem/:probId',
 app.get('/showProblem/:probId',
       answerController.getAnswer,
       answerController.getProblem,
+      problemController.getAnswerCountL,
+      problemController.getReviewCountL,
       problemController.getCourseL,
       (req,res) => res.render("showProblem",{probId:req.params.probId})
     )

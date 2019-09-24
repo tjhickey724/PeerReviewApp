@@ -182,3 +182,36 @@ exports.getProblemSetL = ( req, res, next ) => {
     } )
 
 };
+
+
+exports.getAnswerCountL = ( req, res, next ) => {
+  console.log('in countAnswersL')
+  Answer.countDocuments({problemId:res.locals.problem._id})
+    .exec()
+    .then( (num) => {
+      console.log('answerCount='+num)
+      res.locals.answerCount=num
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in countAnswersL: "+ error.message );
+      res.send(error)
+    } )
+
+};
+
+exports.getReviewCountL = ( req, res, next ) => {
+  console.log('in countAnswersL')
+  Review.countDocuments({problemId:res.locals.problem._id})
+    .exec()
+    .then( (num) => {
+      console.log('reviewCount='+num)
+      res.locals.reviewCount=num
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in reviewAnswersL: "+ error.message );
+      res.send(error)
+    } )
+
+};
