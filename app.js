@@ -24,6 +24,7 @@ db.once('open', function() {
   console.log("we are connected!!!")
 });
 
+const dbController = require('./controllers/dbController')
 const classController = require('./controllers/classController')
 const problemSetController = require('./controllers/problemSetController')
 const problemController = require('./controllers/problemController')
@@ -232,6 +233,7 @@ app.post('/saveAnswer/:probId',
       answerController.getProblem,
       answerController.saveAnswer,
       answerController.getAnswer,
+      problemController.getCourseL,
       (req,res) => res.render("showProblem" ,{probId:req.params.probId})
     )
 
@@ -255,6 +257,12 @@ app.get('/showStudentInfo/:classId',
   classController.addClassInfo,
   //classController.getStudents,
   (req,res) => res.render("showStudentInfo")
+)
+
+app.get('/showReviewsOfAnswer/:answerId',
+  dbController.getAnswer,
+  dbController.getReviews,
+  (req,res) => res.render("showReviewsOfAnswer")
 )
 
 

@@ -1,0 +1,22 @@
+<%- include('bootheader') -%>
+<%- include('menubar') -%>
+    <h1>Answer</h1>
+    <small>Submission time and date:<%= answer.createdAt %> </small>
+    <pre class="bg-success      "><%= answer.answer %></pre>
+    <br>
+
+    <h1>Reviews</h1>
+    <ul>
+    <% for(i = 0; i<= reviews.length-1; i++){  %>
+        <li> <%= reviews[i].points %> points<br>
+            <a href="/showReview/<%= reviews[i]._id %>">
+                <%= reviews[i].review %>
+            </a>
+            <hr>
+        </li>
+    <% } %>
+    </ul>
+    <hr>
+
+
+<%- include('bootfooter') -%>

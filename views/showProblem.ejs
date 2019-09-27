@@ -27,7 +27,9 @@
             <small>Submission time and date:<%= problem.createdAt %> </small>
             <pre class="bg-success      "><%= answer.answer %></pre>
             <br>
-            <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-info">Review others answers</a>
+            <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
+            <a href="/showReviewsOfAnswer/<%= answer._id %>" class="btn btn-small btn-info">Reviews of your answer</a>
+            <a href="/showReviewsByUser/<%= problem._id %>" class="btn btn-small btn-info">Your Reviews of other's answers</a>
             <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
 
     <% } else { %>
