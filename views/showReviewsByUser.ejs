@@ -1,0 +1,22 @@
+<%- include('bootheader') -%>
+<%- include('menubar') -%>
+    <h2>The Problem you reviewed</h2>
+    <small>Submission time and date:<%= problem.createdAt %> </small>
+    <pre class="bg-success      "><%= problem.problemText %></pre>
+    <br>
+    <h2>Your reviews of other's answers</h2>
+    <ul>
+    <% for(i = 0; i<= usersReviews.length-1; i++){  %>
+        <li> their answer:<pre class="bg-info"><%= usersReviews[i].answer %></pre>
+            your review: <%= usersReviews[i].points %>/<%= problem.points %>pts<br>
+            <a href="/showReview/<%= usersReviews[i]._id %>">
+                <%= usersReviews[i].review %>
+            </a>
+            <hr>
+        </li>
+    <% } %>
+    </ul>
+    <hr>
+
+
+<%- include('bootfooter') -%>

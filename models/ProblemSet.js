@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var problemSetSchema = Schema( {
-  classId: ObjectId,
+  courseId: ObjectId,
   name: String,
   createdAt: Date,
 } );

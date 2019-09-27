@@ -25,7 +25,7 @@ db.once('open', function() {
 });
 
 const dbController = require('./controllers/dbController')
-const classController = require('./controllers/classController')
+const courseController = require('./controllers/courseController')
 const problemSetController = require('./controllers/problemSetController')
 const problemController = require('./controllers/problemController')
 const answerController = require('./controllers/answerController')
@@ -144,52 +144,52 @@ function isLoggedIn(req, res, next) {
 
 
 app.get('/',
-  classController.getClassesYouOwn,
-  classController.getRegistrations,
-  classController.getClassesYouTake,
+  courseController.getCoursesYouOwn,
+  courseController.getRegistrations,
+  courseController.getCoursesYouTake,
   function(req, res, next) {
       res.render('index',{title:"PRA"});
 });
 
 app.use(isLoggedIn)
 
-app.get('/createClass',
-      (req,res) => res.render('createClass'))
+app.get('/createCourse',
+      (req,res) => res.render('createCourse'))
 
-app.post('/createNewClass',
-      classController.createClass,
+app.post('/createNewCourse',
+      courseController.createCourse,
       (req,res) => res.redirect('/'))
 
-app.get('/showClass/:classId',
-      classController.addClassInfo,
-      classController.checkEnrollment,
+app.get('/showCourse/:courseId',
+      courseController.addCourseInfo,
+      courseController.checkEnrollment,
       problemSetController.getProblemSets,
-      (req,res) => res.render('showClass'))
+      (req,res) => res.render('showCourse'))
 
-app.post('/joinClass',
-      classController.addClassFromPin,
-      classController.checkEnrollment,
+app.post('/joinCourse',
+      courseController.addCourseFromPin,
+      courseController.checkEnrollment,
       problemSetController.getProblemSets,
-      classController.joinClass,
-      (req,res) => res.render("showClass")
+      courseController.joinCourse,
+      (req,res) => res.render("showCourse")
     )
 
-app.get('/addProblemSet/:classId',
-      classController.addClassInfo,
+app.get('/addProblemSet/:courseId',
+      courseController.addCourseInfo,
       (req,res) => res.render("addProblemSet")
     )
 
-app.post('/saveProblemSet/:classId',
-      classController.addClassInfo,
+app.post('/saveProblemSet/:courseId',
+      courseController.addCourseInfo,
       problemSetController.saveProblemSet,
       problemSetController.getProblemSets,
-      (req,res) => res.render("showClass")
+      (req,res) => res.render("showCourse")
     )
 
 app.get('/showProblemSet/:psetId',
       problemSetController.getProblemSet,
       problemSetController.getProblems,
-      problemSetController.getClassInfo,
+      problemSetController.getCourseInfo,
       (req,res) => res.render('showProblemSet'))
 
 app.get('/addProblem/:psetId',
@@ -198,7 +198,7 @@ app.get('/addProblem/:psetId',
 
 app.post('/saveProblem/:psetId',
       problemSetController.getProblemSet,
-      problemSetController.getClassInfo,
+      problemSetController.getCourseInfo,
       problemSetController.saveProblem,
       problemSetController.getProblems,
       (req,res) => res.render("showProblemSet")
@@ -253,9 +253,9 @@ app.post('/saveReview/:probId/:answerId',
       res.render("reviewAnswer")
   )
 
-app.get('/showStudentInfo/:classId',
-  classController.addClassInfo,
-  //classController.getStudents,
+app.get('/showStudentInfo/:courseId',
+  courseController.addCourseInfo,
+  //courseController.getStudents,
   (req,res) => res.render("showStudentInfo")
 )
 
@@ -263,6 +263,12 @@ app.get('/showReviewsOfAnswer/:answerId',
   dbController.getAnswer,
   dbController.getReviews,
   (req,res) => res.render("showReviewsOfAnswer")
+)
+
+app.get('/showReviewsByUser/:problemId',
+  dbController.getProblem,
+  dbController.getUsersReviews,
+  (req,res) => res.render("showReviewsByUser",{reviews:[]})
 )
 
 

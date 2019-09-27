@@ -5,7 +5,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var reviewSchema = Schema( {
   reviewerId: ObjectId,
-  classId: ObjectId,
+  courseId: ObjectId,
   psetId: ObjectId,
   problemId: ObjectId,
   answerId: ObjectId,

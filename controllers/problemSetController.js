@@ -1,14 +1,14 @@
 'use strict';
-const Class = require( '../models/Class' );
+const Course = require( '../models/Course' );
 const ProblemSet = require( '../models/ProblemSet' );
 const Problem = require( '../models/Problem' );
 
 exports.saveProblemSet = ( req, res, next ) => {
-  const classId = req.params.classId
+  const courseId = req.params.courseId
   let newProblemSet = new ProblemSet(
    {
     name: req.body.name,
-    classId:classId,
+    courseId:courseId,
     createdAt: new Date()
    }
   )
@@ -30,7 +30,7 @@ exports.getProblemSets = ( req, res, next ) => {
   console.log('in getProblemSets')
   if (!req.user) next()
 
-  ProblemSet.find({classId:res.locals.classInfo._id})
+  ProblemSet.find({courseId:res.locals.courseInfo._id})
     .exec()
     .then( problemSets => {
       console.log("adding problemsets: "+problemSets.length)
@@ -49,7 +49,7 @@ exports.getProblemSets = ( req, res, next ) => {
 
 // this displays all of the skills
 exports.getProblemSet = ( req, res, next ) => {
-  console.log('in getClassInfo')
+  console.log('in getCourseInfo')
   const id = req.params.psetId
   ProblemSet.findOne({_id:id})
     .exec()
@@ -59,23 +59,23 @@ exports.getProblemSet = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getClassInfo: "+ error.message );
+      console.log("Error in getCourseInfo: "+ error.message );
       res.send(error)
     } )
 
 };
 
 // this displays all of the skills
-exports.getClassInfo = ( req, res, next ) => {
-  console.log('in getClassInfo')
-  Class.findOne({_id:res.locals.problemSet.classId})
+exports.getCourseInfo = ( req, res, next ) => {
+  console.log('in getCourseInfo')
+  Course.findOne({_id:res.locals.problemSet.courseId})
     .exec()
-    .then( ( classInfo ) => {
-      res.locals.classInfo = classInfo
+    .then( ( courseInfo ) => {
+      res.locals.courseInfo = courseInfo
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getClassInfo: "+ error.message );
+      console.log("Error in getCourseInfo: "+ error.message );
       res.send(error)
     } )
 
@@ -117,7 +117,7 @@ exports.saveProblem = ( req, res, next ) => {
   console.log("psetId = "+psetId)
   let newProblem = new Problem(
    {
-    classId: res.locals.problemSet.classId,
+    courseId: res.locals.problemSet.courseId,
     psetId: res.locals.problemSet._id,
     description: req.body.description,
     problemText: req.body.problemText,

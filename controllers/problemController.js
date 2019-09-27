@@ -1,5 +1,5 @@
 'use strict';
-const Class = require( '../models/Class' );
+const Course = require( '../models/Course' );
 const ProblemSet = require( '../models/ProblemSet' );
 const Problem = require( '../models/Problem' );
 const Answer = require('../models/Answer')
@@ -10,7 +10,7 @@ exports.saveAnswer = ( req, res, next ) => {
   let newAnswer = new Answer(
    {
     studentId:req.user._id,
-    classId:problem.classId,
+    courseId:problem.courseId,
     psetId:problem.psetId,
     problemId:problem._id,
     answer:req.body.answer,
@@ -50,7 +50,7 @@ exports.getMyAnswerP = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getClassInfo: "+ error.message );
+      console.log("Error in getCourseInfo: "+ error.message );
       res.send(error)
     } )
 
@@ -119,7 +119,7 @@ exports.getNextAnswerPL = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getClassInfo: "+ error.message );
+      console.log("Error in getCourseInfo: "+ error.message );
       res.send(error)
     } )
 
@@ -129,7 +129,7 @@ exports.getCourseL = ( req, res, next ) => {
   console.log('in getCourseL')
   console.log(res.locals.problem)
   console.log("...")
-  Class.findOne({_id:res.locals.problem.classId})
+  Course.findOne({_id:res.locals.problem.courseId})
     .exec()
     .then( (course) => {
       console.log(course)

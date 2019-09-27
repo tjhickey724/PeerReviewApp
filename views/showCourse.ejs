@@ -1,7 +1,7 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
-    <h1><%= classInfo.name %></h1>
-    Student PIN <%= classInfo.classPin  %>
+    <h1><%= courseInfo.name %></h1>
+    Student PIN <%= courseInfo.coursePin  %>
 
 
 <hr>
@@ -18,11 +18,11 @@
     <% } %>
     </ul>
 <hr>
-    <% if (user._id.equals(classInfo.ownerId)) { %>
-        <a href="/addProblemSet/<%= classInfo._id %>" class="btn btn-sm btn-danger">
+    <% if (user._id.equals(courseInfo.ownerId)) { %>
+        <a href="/addProblemSet/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
             Add Problem Set
         </a>
-        <a href="/showStudentInfo/<%= classInfo._id %>" class="btn btn-sm btn-danger">
+        <a href="/showStudentInfo/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
             Show Student Info
         </a>
     <% } else { %>

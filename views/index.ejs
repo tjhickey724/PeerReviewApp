@@ -12,43 +12,43 @@
          <a class="btn btn-lg btn-danger" href="/auth/google"> Login</a>
          </h2>
     <% } else {%>
-        <form method="post" action="/joinClass">
-        Enroll in a class:
-        <input type="input" name="classPin" placeholder="7 digit pin"s>
+        <form method="post" action="/joinCourse">
+        Enroll in a course:
+        <input type="input" name="coursePin" placeholder="7 digit pin"s>
         </form>
         <hr>
         <div class="row">
             <div class="col bg-warning">
-                <h2>Classes I'm taking</h2>
+                <h2>Courses I'm taking</h2>
                 <ul>
-                <% for(i = 0; i<= classesTaken.length-1; i++){  %>
+                <% for(i = 0; i<= coursesTaken.length-1; i++){  %>
                     <li>
-                        <a href="/showClass/<%= classesTaken[i]._id %>">
-                            <%= classesTaken[i].name %>
+                        <a href="/showCourse/<%= coursesTaken[i]._id %>">
+                            <%= coursesTaken[i].name %>
                         </a>
                     </li>
                 <% } %>
                 </ul>
             </div>
             <div class="col bg-primary">
-                <h2>Classes I'm TAing</h2>
+                <h2>Courses I'm TAing</h2>
                 <ul>
-                <% for(i = 0; i<= classes.length-1; i++){  %>
+                <% for(i = 0; i<= courses.length-1; i++){  %>
                     <li>
-                        <a href="/showClass/<%= classes[i]._id %>">
-                            <%= classes[i].name %>
+                        <a href="/showCourse/<%= courses[i]._id %>">
+                            <%= courses[i].name %>
                         </a>
                     </li>
                 <% } %>
                 </ul>
             </div>
             <div class="col bg-danger">
-                <h2>Classes I'm Teaching</h2>
+                <h2>Courses I'm Teaching</h2>
                 <ul>
-                <% for(i = 0; i<= classes.length-1; i++){  %>
+                <% for(i = 0; i<= courses.length-1; i++){  %>
                     <li>
-                        <a href="/showClass/<%= classes[i]._id %>">
-                            <%= classes[i].name %>
+                        <a href="/showCourse/<%= courses[i]._id %>">
+                            <%= courses[i].name %>
                         </a>
                     </li>
                 <% } %>

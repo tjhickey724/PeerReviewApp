@@ -1,5 +1,5 @@
 'use strict';
-const Class = require( '../models/Class' );
+const Course = require( '../models/Course' );
 const ProblemSet = require( '../models/ProblemSet' );
 const Problem = require( '../models/Problem' );
 const Answer = require('../models/Answer')
@@ -11,7 +11,7 @@ exports.saveAnswer = ( req, res, next ) => {
   let newAnswer = new Answer(
    {
     studentId:req.user._id,
-    classId:problem.classId,
+    courseId:problem.courseId,
     psetId:problem.psetId,
     problemId:problem._id,
     answer:req.body.answer,
@@ -51,7 +51,7 @@ exports.getAnswer = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getClassInfo: "+ error.message );
+      console.log("Error in getCourseInfo: "+ error.message );
       res.send(error)
     } )
 
@@ -82,7 +82,7 @@ exports.saveReview = ( req, res, next ) => {
   let newReview = new Review(
    {
     reviewerId:req.user._id,
-    classId:problem.classId,
+    courseId:problem.courseId,
     psetId:problem.psetId,
     problemId:problem._id,
     answerId:answerId,
@@ -146,7 +146,7 @@ exports.getNextAnswer = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in getClassInfo: "+ error.message );
+      console.log("Error in getCourseInfo: "+ error.message );
       res.send(error)
     } )
 

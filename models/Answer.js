@@ -5,7 +5,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var answerSchema = Schema( {
   studentId: ObjectId,
-  classId: ObjectId,
+  courseId: ObjectId,
   psetId: ObjectId,
   problemId: ObjectId,
   answer: String,

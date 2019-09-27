@@ -3,11 +3,10 @@ const mongoose = require( 'mongoose' );
 const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
-var classSchema = Schema( {
-  name: String,
-  ownerId: ObjectId,
-  classPin: Number,
+var courseMemberSchema = Schema( {
+  studentId: ObjectId,
+  courseId: ObjectId,
   createdAt: Date,
 } );
 
-module.exports = mongoose.model( 'Class', classSchema );
+module.exports = mongoose.model( 'CourseMember', courseMemberSchema );

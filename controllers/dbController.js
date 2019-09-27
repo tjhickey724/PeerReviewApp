@@ -1,5 +1,5 @@
 'use strict';
-const Class = require( '../models/Class' );
+const Course = require( '../models/Course' );
 const ProblemSet = require( '../models/ProblemSet' );
 const Problem = require( '../models/Problem' );
 const Answer = require('../models/Answer')
@@ -83,7 +83,7 @@ exports.getProblemSet = ( req, res, next ) => {
 exports.getCourse = ( req, res, next ) => {
   console.log('in db.getCourse')
   const id = req.params.courseId
-  Class.findOne({_id:id})
+  Course.findOne({_id:id})
     .exec()
     .then( (x) => {
       res.locals.course = x
@@ -94,3 +94,27 @@ exports.getCourse = ( req, res, next ) => {
       res.send(error)
     } )
 };
+
+
+exports.getUsersReviews = (req,res,next) => {
+  // we want to return a list of objects
+  //   {answer,review,points,createdAt}
+  // we we have to do
+  res.locals.usersReviews =
+    [{
+      answer:'I don\'t know',
+      review:'Make a guess!',
+      review_id:'review_id',
+      points:0,
+      createdAt:new Date()
+    },
+    {
+      answer:'a*b*math.cos(t)',
+      review:'excellent',
+      review_id:'review_id',
+      points:5,
+      createdAt:new Date()
+    }]
+  next()
+
+}
