@@ -268,7 +268,12 @@ app.get('/showReviewsOfAnswer/:answerId',
 app.get('/showReviewsByUser/:problemId',
   dbController.getProblem,
   dbController.getUsersReviews,
-  (req,res) => res.render("showReviewsByUser",{reviews:[]})
+  dbController.getUsersReviewedAnswers,
+  (req,res) => res.render("showReviewsByUser")
+)
+
+app.get('/showReview/:reviewId',
+  (req,res) => res.send("Under Construction")
 )
 
 

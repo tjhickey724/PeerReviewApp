@@ -98,23 +98,44 @@ exports.getCourse = ( req, res, next ) => {
 
 exports.getUsersReviews = (req,res,next) => {
   // we want to return a list of objects
-  //   {answer,review,points,createdAt}
+  //   {_id,answer,review,points,createdAt}
+  // this returns the reviews with
+  //  reviewerId == req.user._id
+  //  problemId == res.locals.problem._id
   // we we have to do
-  res.locals.usersReviews =
-    [{
-      answer:'I don\'t know',
-      review:'Make a guess!',
-      review_id:'review_id',
-      points:0,
-      createdAt:new Date()
-    },
-    {
-      answer:'a*b*math.cos(t)',
-      review:'excellent',
-      review_id:'review_id',
-      points:5,
-      createdAt:new Date()
-    }]
-  next()
+  Review.find(
+      {reviewerId:req.user._id,
+       problemId:res.locals.problem._id}
+     )
+  .then(reviews => {
+    res.locals.usersReviews = reviews
+    next()
+  })
+  .catch((error) => {
+    console.log("error in db.getUsersReviews: "+error.message)
+    res.send("Error in db.getUsersReviews: "+error.message)
+  })
+
+}
+
+exports.getUsersReviewedAnswers = (req,res,next) => {
+  // we want to return a list of objects
+  //   {_id,answer,review,points,createdAt}
+  // this returns the reviews with
+  //  reviewerId == req.user._id
+  //  problemId == res.locals.problem._id
+  // we we have to do
+  const answerIds = res.locals.usersReviews.map((r)=>r.answerId)
+  Answer.find(
+      {_id:{$in:answerIds}}
+     )
+  .then(answers => {
+    res.locals.usersReviewedAnswers = answers
+    next()
+  })
+  .catch((error) => {
+    console.log("error in db.getUsersReviewedAnswers: "+error.message)
+    res.send("Error in db.getUsersReviewedAnswers: "+error.message)
+  })
 
 }

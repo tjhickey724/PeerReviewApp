@@ -7,11 +7,22 @@
     <h2>Your reviews of other's answers</h2>
     <ul>
     <% for(i = 0; i<= usersReviews.length-1; i++){  %>
-        <li> their answer:<pre class="bg-info"><%= usersReviews[i].answer %></pre>
-            your review: <%= usersReviews[i].points %>/<%= problem.points %>pts<br>
+        <li style="border-top:thick solid black"> their answer:
+
+              <% let answers =
+                 usersReviewedAnswers.filter(
+                   (a)=> (a._id.equals(usersReviews[i].answerId))
+                 )
+                 let answer = answers[0]
+              %>
+              <pre class="bg-info"><%= answer.answer %></pre>
+            your review: <%= usersReviews[i].points %>/<%= problem.points %>pts 
             <a href="/showReview/<%= usersReviews[i]._id %>">
-                <%= usersReviews[i].review %>
+                (edit)
             </a>
+            <pre style="border:thick solid green" class="bg-warning">
+              <%= usersReviews[i].review %>
+             </pre>
             <hr>
         </li>
     <% } %>
