@@ -232,3 +232,20 @@ exports.getAverageReviewL = ( req, res, next ) => {
     } )
 
 };
+
+exports.getAnswers = ( req, res, next ) => {
+  const id = req.params.probId
+
+  Answer.find({problemId:id})
+    .exec()
+    .then( answers => {
+      console.log("answers = "+answers)
+      res.locals.answers = answers
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in getAnswers: "+ error.message );
+      res.send(error)
+    } )
+
+};
