@@ -11,7 +11,8 @@
                 Reviews: <%= reviewCount %>
             </div>
             <div class="col-md">
-                Average Review: <%= averageReview %>/<%= problem.points %>
+                Average Review: <%= Math.round(100*averageReview/problem.points) %>%
+                 = <%= averageReview.toFixed(2) %>/<%= problem.points %>
             </div>
             <div class="col-md text-right">
                 <a href="/editProblem/<%= problem._id %>"
