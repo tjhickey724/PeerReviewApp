@@ -218,6 +218,7 @@ app.get('/showProblem/:probId',
       answerController.getProblem,
       problemController.getAnswerCountL,
       problemController.getReviewCountL,
+      problemController.getAverageReviewL,
       problemController.getCourseL,
       (req,res) => res.render("showProblem",{probId:req.params.probId})
     )

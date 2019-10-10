@@ -2,13 +2,16 @@
 <%- include('menubar') -%>
 
     <h3><%= problem.description %></h3>
-    <% if (course.ownerId.equals(user._id)) { %>
+    <% if (true || course.ownerId.equals(user._id)) { %>
         <div class="row">
             <div class="col-md">
                 Answers: <%= answerCount %>
             </div>
             <div class="col-md">
                 Reviews: <%= reviewCount %>
+            </div>
+            <div class="col-md">
+                Average Review: <%= averageReview %>/<%= problem.points %>
             </div>
             <div class="col-md text-right">
                 <a href="/editProblem/<%= problem._id %>"

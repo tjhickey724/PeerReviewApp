@@ -215,3 +215,20 @@ exports.getReviewCountL = ( req, res, next ) => {
     } )
 
 };
+
+exports.getAverageReviewL = ( req, res, next ) => {
+
+  Review.find({problemId:res.locals.problem._id})
+    .exec()
+    .then( reviews => {
+      let sum = reviews.reduce((t,x)=>t+x.points,0)
+      res.locals.averageReview=sum/reviews.length
+      console.log("average review = "+sum+"/"+reviews.length)
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in getAverageReviewL: "+ error.message );
+      res.send(error)
+    } )
+
+};
