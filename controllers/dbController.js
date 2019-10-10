@@ -52,12 +52,13 @@ exports.getAnswer = ( req, res, next ) => {
 };
 
 exports.getProblem = ( req, res, next ) => {
-  console.log('in db.getProblem')
-  const id = req.params.problemId
+  //console.log('in db.getProblem')
+  const id = req.params.probId
   Problem.findOne({_id:id})
     .exec()
-    .then( (x) => {
-      res.locals.problem = x
+    .then( (problem) => {
+      //console.log('problem = '+problem)
+      res.locals.problem = problem
       next()
     } )
     .catch( ( error ) => {
