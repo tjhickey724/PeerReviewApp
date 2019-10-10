@@ -10,6 +10,9 @@
             <div class="col-md">
                 Reviews: <%= reviewCount %>
             </div>
+            <div class="col-md">
+                Average Review: <%= averageReview %>/<%= problem.points %>
+            </div>
             <div class="col-md text-right">
                 <a href="/editProblem/<%= problem._id %>"
                    class="btn btn-sm btn-info">
