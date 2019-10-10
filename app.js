@@ -223,6 +223,12 @@ app.get('/showProblem/:probId',
       (req,res) => res.render("showProblem",{probId:req.params.probId})
     )
 
+app.get('/showAllAnswers/:probId',
+      dbController.getProblem,
+      problemController.getAnswers,
+      (req,res) => res.render('showAllAnswers')
+    )
+
 app.get('/editProblem/:probId',
     problemController.getProblemP,
     problemController.getCourseL,
