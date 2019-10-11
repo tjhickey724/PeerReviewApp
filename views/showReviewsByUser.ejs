@@ -7,7 +7,7 @@
     <h2>Your reviews of other's answers</h2>
     <ul>
     <% for(i = 0; i<= usersReviews.length-1; i++){  %>
-        <li style="border-top:thick solid black"> their answer:
+        <li style="border-top:thick dashed black; padding:20px"> their answer:
 
               <% let answers =
                  usersReviewedAnswers.filter(
@@ -16,13 +16,12 @@
                  let answer = answers[0]
               %>
               <pre class="bg-info"><%= answer.answer %></pre>
-            your review: <%= usersReviews[i].points %>/<%= problem.points %>pts 
+            your review: <%= usersReviews[i].points %>/<%= problem.points %>pts
             <a href="/showReview/<%= usersReviews[i]._id %>">
                 (edit)
             </a>
-            <pre style="border:thick solid green" class="bg-warning">
-              <%= usersReviews[i].review %>
-             </pre>
+            <pre style="border:thick solid green"
+                 class="bg-warning"><%= usersReviews[i].review %></pre>
             <hr>
         </li>
     <% } %>

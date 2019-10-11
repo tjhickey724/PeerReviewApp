@@ -272,7 +272,7 @@ app.get('/showReviewsOfAnswer/:answerId',
   (req,res) => res.render("showReviewsOfAnswer")
 )
 
-app.get('/showReviewsByUser/:problemId',
+app.get('/showReviewsByUser/:probId',
   dbController.getProblem,
   dbController.getUsersReviews,
   dbController.getUsersReviewedAnswers,
