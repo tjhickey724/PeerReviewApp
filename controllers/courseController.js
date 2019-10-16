@@ -2,11 +2,9 @@
 const Course = require( '../models/Course' );
 const CourseMember = require( '../models/CourseMember' );
 
-
+//good
 exports.createCourse = ( req, res, next ) => {
-  //console.log("in saveSkill!")
-  console.log("in createCourse.... req.user=")
-  console.dir(req.user)
+
   let coursePin =  Math.floor(Math.random()*10000000)
   let newCourse = new Course(
    {
@@ -17,12 +15,8 @@ exports.createCourse = ( req, res, next ) => {
    }
   )
 
-  //console.log("skill = "+newSkill)
-
   newCourse.save()
     .then( (a) => {
-      console.log('saved a new course: '+req.body.courseName)
-      console.dir(a)
       next();
     } )
     .catch( error => {
@@ -31,6 +25,8 @@ exports.createCourse = ( req, res, next ) => {
 };
 
 
+//*** MOVE to courseMemberController
+//*** CHANGE NAME to getUsersRegistrations
 // this gets all of the courseId's
 // for courses that a student is enrolled in
 exports.getRegistrations = ( req, res, next ) => {
@@ -51,7 +47,7 @@ exports.getRegistrations = ( req, res, next ) => {
 };
 
 
-
+// *** CHANGE NAME to getCoursesUserIsTaking
 // this finds all of the courseId's
 // for courses that the user is taking
 exports.getCoursesYouTake = ( req, res, next ) => {
@@ -131,6 +127,7 @@ exports.addCourseFromPin = ( req, res, next ) => {
 
 };
 
+// *** MOVE TO  courseMemberController
 // this checks to see if the user is enrolled
 // in the current course (res.locals.courseInfo)
 // and adds the boolean isEnrolled to res.locals
@@ -148,6 +145,8 @@ exports.checkEnrollment = ( req, res, next ) => {
 
 };
 
+
+// ** MOVE TO courseMemberController
 // this adds the current user to the curent course
 // assuming res.locals.courseInfo has been set
 exports.joinCourse = ( req, res, next ) => {

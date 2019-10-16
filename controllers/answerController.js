@@ -58,7 +58,7 @@ exports.getAnswer = ( req, res, next ) => {
 };
 
 
-
+// REMOVE!!
 exports.getProblem = ( req, res, next ) => {
   console.log('in getProblem')
   const id = req.params.probId
@@ -75,6 +75,8 @@ exports.getProblem = ( req, res, next ) => {
 
 };
 
+
+// *** MOVE TO reviewController
 exports.saveReview = ( req, res, next ) => {
   const problemId = req.params.probId
   const answerId = req.params.answerId
@@ -103,6 +105,8 @@ exports.saveReview = ( req, res, next ) => {
     } );
 };
 
+
+// *** MOVE TO reviewController
 exports.getMyReviews = ( req, res, next ) => {
   console.log('in getMyReviews')
   const probId = req.params.probId
@@ -120,14 +124,22 @@ exports.getMyReviews = ( req, res, next ) => {
 
 };
 
+
 exports.getNextAnswer = ( req, res, next ) => {
   console.log('in getNextAnswer')
   const id = req.params.probId
   console.log(`probId=${id} studentId=${res.locals.user._id}`)
 
   /*
-    Here we find an answer for that problem which
+    Here we find a random answer for that problem which
     we have not already reviewed...
+    We should modify add another one which first finds a problem
+    which has not been reviewed, and if all have been reviewed then
+    it picks randomly... Or maybe looks for ones with <2 reviews,
+    then <3, etc. before picking randomly.... Once it finds a review
+    it can quickly exit the middleware so this would not be too expensive.
+    We could also sort on the number of reviews, but that might take
+    longer...
   */
   Answer.find({problemId:id,_id:{$not:{$in:res.locals.reviewedAnswers}}})
     .exec()

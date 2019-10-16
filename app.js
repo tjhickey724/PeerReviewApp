@@ -156,9 +156,11 @@ app.use(isLoggedIn)
 app.get('/createCourse',
       (req,res) => res.render('createCourse'))
 
+// rename this to /createCourse and update the ejs form
 app.post('/createNewCourse',
       courseController.createCourse,
       (req,res) => res.redirect('/'))
+
 
 app.get('/showCourse/:courseId',
       courseController.addCourseInfo,
@@ -208,14 +210,14 @@ app.post('/updateProblem/:probId',
     problemController.getCourseL,
     answerController.getAnswer,
     problemController.updateProblemLB,
-    answerController.getProblem,
+    dbController.getProblem,
     //problemController.getProblemSetL,
     //problemSetController.getProblems,
     (req,res) => res.render("showProblem",{probId:req.params.probId})
   )
 app.get('/showProblem/:probId',
       answerController.getAnswer,
-      answerController.getProblem,
+      dbController.getProblem,
       problemController.getAnswerCountL,
       problemController.getReviewCountL,
       problemController.getAverageReviewL,
@@ -230,29 +232,27 @@ app.get('/showAllAnswers/:probId',
     )
 
 app.get('/editProblem/:probId',
-    problemController.getProblemP,
+    dbController.getProblem,
     problemController.getCourseL,
     (req,res) => res.render("editProblem",{probId:req.params.probId})
   )
 
 
 app.post('/saveAnswer/:probId',
-      answerController.getProblem,
+      dbController.getProblem,
       answerController.saveAnswer,
-      answerController.getAnswer,
-      problemController.getCourseL,
-      (req,res) => res.render("showProblem" ,{probId:req.params.probId})
+      (req,res) => res.redirect("/showProblem/"+req.params.probId)
     )
 
 app.get('/reviewAnswers/:probId',
-      answerController.getProblem,
+      dbController.getProblem,
       answerController.getMyReviews,
       answerController.getNextAnswer,
       (req,res) => res.render("reviewAnswer")
     )
 
 app.post('/saveReview/:probId/:answerId',
-    answerController.getProblem,
+    dbController.getProblem,
     answerController.saveReview,
     answerController.getMyReviews,
     answerController.getNextAnswer,
