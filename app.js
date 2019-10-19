@@ -248,15 +248,27 @@ app.post('/saveAnswer/:probId',
 app.get('/reviewAnswers/:probId',
       dbController.getProblem,
       answerController.getMyReviews,
+      answerController.getReviews,
+      answerController.getNextAnswer0,
       answerController.getNextAnswer,
-      (req,res) => res.render("reviewAnswer")
+      answerController.getReviewsOfAnswer,
+      (req,res) => {
+          console.log("###### preparing to render #####")
+          //console.dir(res.locals)
+          console.log("ZZZZZZZZZZZ")
+          console.log(`res.locals.allReviews = ||${res.locals.allReviews}||`)
+
+          res.render("reviewAnswer")
+        }
     )
 
 app.post('/saveReview/:probId/:answerId',
     dbController.getProblem,
     answerController.saveReview,
     answerController.getMyReviews,
+    answerController.getNextAnswer0,
     answerController.getNextAnswer,
+    answerController.getReviewsOfAnswer,
     (req,res) =>
       res.render("reviewAnswer")
   )
