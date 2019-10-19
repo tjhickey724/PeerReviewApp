@@ -6,14 +6,37 @@
     <hr>
 
     <h2>Answers</h2>
-    <ol>
     <% for(let i=0; i<answers.length; i++){ %>
-      <li>
-        <pre class="bg-warning" style="border-top:thick solid blue; margin:10px"
-           ><%= answers[i].answer %></pre>
-      </li>
+        <div class="row">
+          <div class="col-md-12">
+            <%= answers[i].createdAt %>
+            <pre class="bg-warning"
+                 style="border-top:thick solid blue; margin:10px"
+             ><%= answers[i].answer %></pre>
+          </div>
+        </div>
+
+        <% for (let j=0; j<reviews.length; j++){ %>
+          <% console.log(answers[i]._id+" j="+j+ " "+reviews[j].answerId) %>
+          <% if (reviews[j].answerId.equals(answers[i]._id)) {%>
+            <hr>
+            <div class="row">
+              <div class="col-md-1">
+              </div>
+               <div class="col">
+                  points: <%= reviews[j].points %>/<%= problem.points %>
+                  <%= reviews[j].createdAt %>
+                <br>
+                <pre
+                     style="border-top:thick solid blue; margin:10px"
+                 ><%= reviews[j].review %></pre>
+              </div>
+            </div>
+              <% }%>
+              <% } %>
+        </div>
+
     <%}%>
-    </ol>
 
 
 

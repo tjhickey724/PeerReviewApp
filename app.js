@@ -228,6 +228,7 @@ app.get('/showProblem/:probId',
 app.get('/showAllAnswers/:probId',
       dbController.getProblem,
       problemController.getAnswers,
+      problemController.getReviews,
       (req,res) => res.render('showAllAnswers')
     )
 

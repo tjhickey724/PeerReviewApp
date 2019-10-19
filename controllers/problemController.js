@@ -237,10 +237,29 @@ exports.getAnswers = ( req, res, next ) => {
   const id = req.params.probId
 
   Answer.find({problemId:id})
+    .collation({locale:'en',strength: 2})
+    .sort({answer:1})
     .exec()
     .then( answers => {
       console.log("answers = "+answers)
       res.locals.answers = answers
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in getAnswers: "+ error.message );
+      res.send(error)
+    } )
+
+};
+
+exports.getReviews = ( req, res, next ) => {
+  const id = req.params.probId
+
+  Review.find({problemId:id})
+    .exec()
+    .then( reviews => {
+      console.log("reviews = "+reviews)
+      res.locals.reviews = reviews
       next()
     } )
     .catch( ( error ) => {

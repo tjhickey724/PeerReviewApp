@@ -5,6 +5,14 @@ const Problem = require( '../models/Problem' );
 const Answer = require('../models/Answer')
 const Review = require('../models/Review')
 
+/*
+   Maybe all of these should be in their own controllers,
+   e.g. problemController.getProblem would use probId to get the problem
+   Or we could call it getProblemP  meaning get it from the parameters
+   or getProblemB meaning to get the probID from the body
+   Could we make a general getDocumentP(Typestring) method which
+   would look at the Type and use it to do a lookup?
+*/
 exports.getReview = ( req, res, next ) => {
   console.log('in db.getReview')
   const id = req.params.reviewId
