@@ -237,3 +237,19 @@ exports.getNextAnswer = ( req, res, next ) => {
     } )
 
 };
+
+exports.getAllAnswersForCourse = ( req, res, next ) => {
+
+  const courseId = res.locals.courseInfo._id
+  Answer.find({courseId:courseId})
+    .exec()
+    .then( answers => {
+      res.locals.answers = answers
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in getAllAnswersForCourse: "+ error.message );
+      res.send('gAAFC: '+error)
+    } )
+
+};

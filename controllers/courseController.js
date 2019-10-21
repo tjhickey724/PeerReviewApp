@@ -98,6 +98,8 @@ exports.addCourseInfo = ( req, res, next ) => {
     .exec()
     .then( ( courseInfo ) => {
       res.locals.courseInfo = courseInfo
+      console.log('courseInfo=')
+      console.dir(courseInfo)
       next()
     } )
     .catch( ( error ) => {
@@ -174,3 +176,132 @@ exports.joinCourse = ( req, res, next ) => {
 
 
 };
+
+
+exports.getStudentsInCourse = ( req, res, next ) => {
+  CourseMember.find({courseId:res.locals.courseInfo._id})
+    .exec()
+    .then( memberList => {
+      console.log('memberList.length= '+memberList.length)
+      res.locals.students = memberList.map((x)=>x.studentId)
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("error in checkEnrollment: "+ error.message );
+      res.send(error)
+    } )
+
+};
+
+exports.getStudentsInfo = ( req, res, next ) => {
+  User.find({_id:{$in:res.locals.students}})
+    .exec()
+    .then( studentsInfo => {
+      //console.dir(res.locals.students)
+      console.log('studentsInfo.length ='+studentsInfo.length)
+      res.locals.studentsInfo = studentsInfo
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("error in checkEnrollment: "+ error.message );
+      res.send(error)
+    } )
+
+};
+
+exports.createGradeSheet = ( req, res, next ) => {
+  const gradeSheet =
+     createGradeSheet(
+       res.locals.studentsInfo,
+       res.locals.problems,
+       res.locals.answers,
+       res.locals.reviews)
+  res.locals.gradeSheet = gradeSheet
+  const courseId = req.params.courseId
+  Course.findOneAndUpdate(
+          {_id:courseId},
+          {$set:{gradeSheet:gradeSheet,gradesUpdateTime:new Date()}},
+          {new:true})
+    .exec()
+    .then((newCourse) => {
+          console.log("in createGradeSheet")
+      console.log(JSON.stringify(newCourse))
+      //res.json(gradeSheet)
+      next()
+    })
+    .catch( (error) => {
+      console.log("error in createGradeSheet: "+ error.message );
+      res.send('cgs: '+error)
+    })
+};
+
+function createGradeSheet(students, problems, answers, reviews){
+  let gradeSheet = {}
+  let problemList = {}
+  let answerList={}
+  for (let s in students){
+    let student = students[s]
+    gradeSheet[student._id]={student:student,answers:{}}
+  }
+  for (let p in problems){
+    let problem = problems[p]
+    problemList[problem._id]=problem
+  }
+  for (let a in answers){
+    let answer = answers[a]
+    try {
+      //answer['reviews']=[]
+      //answer.numReviews=0
+      //console.log('***** ANSWER ****')
+      //console.dir(answer)
+      answerList[answer._id]= answer
+      // it is possible that a TA will not be a student
+      // so we need to create a
+      gradeSheet[answer.studentId] =
+          gradeSheet[answer.studentId] || {status:'non-student',student:'non-student',answers:{}}
+      //gradeSheet[answer.studentId]['answers'] =
+        //gradeSheet[answer.studentId]['answers'] || {}
+      gradeSheet[answer.studentId]['answers'][answer._id]
+        ={answer:answer, reviews:[]}
+    } catch(e){
+      console.log("Error with answer:")
+      console.dir(e)
+      console.log('\n\n\n ************ \n\n\n')
+      console.log('answer._id')
+      console.dir(answer._id)
+      console.log('answer.studentId')
+      console.dir(JSON.stringify(answer.studentId))
+      console.log('gradeSheet[answer.studentId]')
+      console.dir(gradeSheet[answer.studentId.toString()])
+      //console.log("gradeSheet[answer.studentId]['answers']")
+      //console.dir(gradeSheet[answer.studentId.toString()]['answers'])
+      console.log('\n\n#########\n\n')
+      console.dir(JSON.stringify(gradeSheet,null,20))
+    }
+  }
+
+  for (let r in reviews) {
+    let review = reviews[r]
+    try {
+      let z =
+        gradeSheet[answerList[review.answerId].studentId]
+          ['answers'][review.answerId]
+      //z['reviews'] = z['reviews']||[]
+      z['reviews'].push(review)
+      //console.log('***** Reviews *****  '+ r)
+      //console.log(JSON.stringify(z,null,20))
+    } catch(error){
+      console.log("Error with reviews:")
+      console.dir(error)
+      console.log('\n\n\n ************ \n\n\n')
+      console.dir(review)
+      console.dir(answerList[review.answerId])
+      console.dir(answerList[review.answerId].studentId)
+      console.dir(gradeSheet[answerList[review.answerId].studentId])
+      //console.dir(gradeSheet)
+    }
+  }
+
+
+  return {grades:gradeSheet,problems:problemList,answers:answerList}
+}

@@ -268,3 +268,19 @@ exports.getReviews = ( req, res, next ) => {
     } )
 
 };
+
+exports.getAllProblemsForCourse = ( req, res, next ) => {
+
+  const courseId = res.locals.courseInfo._id
+  Problem.find({courseId:courseId})
+    .exec()
+    .then( problems => {
+      res.locals.problems = problems
+      next()
+    } )
+    .catch( ( error ) => {
+      console.log("Error in getAllProblemsForCourse: "+ error.message );
+      res.send('gAPFC: '+error)
+    } )
+
+};

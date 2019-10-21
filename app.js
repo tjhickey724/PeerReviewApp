@@ -29,6 +29,7 @@ const courseController = require('./controllers/courseController')
 const problemSetController = require('./controllers/problemSetController')
 const problemController = require('./controllers/problemController')
 const answerController = require('./controllers/answerController')
+const reviewController = require('./controllers/reviewController')
 
 // Authentication
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
@@ -273,10 +274,28 @@ app.post('/saveReview/:probId/:answerId',
       res.render("reviewAnswer")
   )
 
+app.get('/showAllStudentInfo/:courseId',
+  courseController.addCourseInfo,
+  courseController.getStudentsInCourse,
+  courseController.getStudentsInfo,
+  answerController.getAllAnswersForCourse,
+  problemController.getAllProblemsForCourse,
+  reviewController.getAllReviewsForCourse,
+  courseController.createGradeSheet,
+  (req,res) => //res.json(res.locals.gradeSheet) //
+        res.render("showAllStudentInfo")
+)
+
 app.get('/showStudentInfo/:courseId',
   courseController.addCourseInfo,
-  //courseController.getStudents,
-  (req,res) => res.render("showStudentInfo")
+  courseController.getStudentsInCourse,
+  courseController.getStudentsInfo,
+  answerController.getAllAnswersForCourse,
+  problemController.getAllProblemsForCourse,
+  reviewController.getAllReviewsForCourse,
+  courseController.createGradeSheet,
+  (req,res) => //res.json(res.locals.gradeSheet) //
+        res.render("showStudentInfo")
 )
 
 app.get('/showReviewsOfAnswer/:answerId',
