@@ -1,5 +1,47 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
     <h1>Student Info for <%= courseInfo.name %> </h1>
-    <i>Under Construction</i>
+    <i>Beta Test ... </i>
+    studentInfo.length = '<%= studentsInfo.length %>'
+    <table class="table table-bordered table-striped">
+      <thead>
+          <tr>
+              <td>Name</td><td>Email</td><td> Problems Completed</td>
+              <td> Number of Reviewed Answers</td>
+              <td> Number of Reviews </td> <td> Avg Review Score </td>
+          </tr>
+      </thead>
+      <tbody>
+        <% for(let i=0; i<studentsInfo.length; i++) {
+            let grades = gradeSheet.grades[studentsInfo[i]._id]
+            let avgReviews = []
+            let numReviews = 0
+            let numReviewed = 0
+            let numAnswers = 0
+            for (a in grades.answers) {
+                numAnswers += 1
+                let answer = grades.answers[a].answer
+                let reviews = grades.answers[a].reviews
+                let reviewScores = reviews.map((x)=>(x.points))
+                let problem = gradeSheet.problems[grades.answers[a].answer.problemId]
+                let score = (reviewScores.reduceRight((x,y)=>x+y,0)/(reviewScores.length * problem.points)*100)
+                score = parseInt((reviewScores.length==0)?0:score)
+                if (reviewScores.length>0) {
+                     numReviewed += 1
+                     avgReviews.push(score)
+                 }
+                numReviews = numReviews + reviews.length
+              } %>
+          <tr><td><%= studentsInfo[i].googlename %></td>
+              <td><%= studentsInfo[i].googleemail %> </td>
+              <td> <%= numAnswers %> </td>
+              <td> <%= numReviewed %> </td>
+              <td> <%= numReviews %> </td>
+              <td><%= (avgReviews.reduceRight((x,y)=>(x+y),0)/numReviewed).toFixed(0) %>% </td>
+              <td> <%= JSON.stringify(avgReviews) %> </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+
 <%- include('bootfooter') -%>

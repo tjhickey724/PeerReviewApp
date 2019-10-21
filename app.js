@@ -29,6 +29,7 @@ const courseController = require('./controllers/courseController')
 const problemSetController = require('./controllers/problemSetController')
 const problemController = require('./controllers/problemController')
 const answerController = require('./controllers/answerController')
+const reviewController = require('./controllers/reviewController')
 
 // Authentication
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
@@ -228,6 +229,7 @@ app.get('/showProblem/:probId',
 app.get('/showAllAnswers/:probId',
       dbController.getProblem,
       problemController.getAnswers,
+      problemController.getReviews,
       (req,res) => res.render('showAllAnswers')
     )
 
@@ -247,23 +249,53 @@ app.post('/saveAnswer/:probId',
 app.get('/reviewAnswers/:probId',
       dbController.getProblem,
       answerController.getMyReviews,
+      answerController.getReviews,
+      answerController.getNextAnswer0,
       answerController.getNextAnswer,
-      (req,res) => res.render("reviewAnswer")
+      answerController.getReviewsOfAnswer,
+      (req,res) => {
+          console.log("###### preparing to render #####")
+          //console.dir(res.locals)
+          console.log("ZZZZZZZZZZZ")
+          console.log(`res.locals.allReviews = ||${res.locals.allReviews}||`)
+
+          res.render("reviewAnswer")
+        }
     )
 
 app.post('/saveReview/:probId/:answerId',
     dbController.getProblem,
     answerController.saveReview,
     answerController.getMyReviews,
+    answerController.getNextAnswer0,
     answerController.getNextAnswer,
+    answerController.getReviewsOfAnswer,
     (req,res) =>
       res.render("reviewAnswer")
   )
 
+app.get('/showAllStudentInfo/:courseId',
+  courseController.addCourseInfo,
+  courseController.getStudentsInCourse,
+  courseController.getStudentsInfo,
+  answerController.getAllAnswersForCourse,
+  problemController.getAllProblemsForCourse,
+  reviewController.getAllReviewsForCourse,
+  courseController.createGradeSheet,
+  (req,res) => //res.json(res.locals.gradeSheet) //
+        res.render("showAllStudentInfo")
+)
+
 app.get('/showStudentInfo/:courseId',
   courseController.addCourseInfo,
-  //courseController.getStudents,
-  (req,res) => res.render("showStudentInfo")
+  courseController.getStudentsInCourse,
+  courseController.getStudentsInfo,
+  answerController.getAllAnswersForCourse,
+  problemController.getAllProblemsForCourse,
+  reviewController.getAllReviewsForCourse,
+  courseController.createGradeSheet,
+  (req,res) => //res.json(res.locals.gradeSheet) //
+        res.render("showStudentInfo")
 )
 
 app.get('/showReviewsOfAnswer/:answerId',

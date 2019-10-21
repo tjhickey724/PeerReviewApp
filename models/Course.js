@@ -8,6 +8,8 @@ var courseSchema = Schema( {
   ownerId: ObjectId,
   coursePin: Number,
   createdAt: Date,
+  gradeSheet: mongoose.Schema.Types.Mixed,
+  gradesUpdateTime: Date
 } );
 
 module.exports = mongoose.model( 'Course', courseSchema );
