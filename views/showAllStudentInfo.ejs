@@ -1,15 +1,29 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
+    <script type="text/javascript" src="/js/sort-table.js"></script>
     <h1>Student Info for <%= courseInfo.name %> </h1>
-    <i>Beta Test ... </i>
-    studentInfo.length = '<%= studentsInfo.length %>'
-    <table class="table table-bordered table-striped">
+
+    Number of Students in Class: <%= studentsInfo.length %>
+    <table class1="table table-bordered table-striped"
+           class="js-sort-table"
+           >
+      <thead>
+          <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Answers and Reviews</th>
+          </tr>
+      </thead>
       <tbody>
         <% for(let i=0; i<studentsInfo.length; i++) {
             let grades = gradeSheet.grades[studentsInfo[i]._id]
             %>
-          <tr><td><%= studentsInfo[i].googlename %></td>
-              <td><%= studentsInfo[i].googleemail %> </td>
+          <tr style="border-top: 30px solid red">
+              <td class="align-top text-danger h6">
+                  <%= studentsInfo[i].googlename %>
+                  <br>
+                  <%= studentsInfo[i].googleemail %>
+              </td>
               <td>
                   <% for (a in grades.answers) {
                       let answer = grades.answers[a].answer
