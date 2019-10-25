@@ -1,8 +1,7 @@
 'use strict';
 const User = require( '../models/User' );
 const axios = require('axios');
-//var apikey = require('../config/apikey');
-//console.dir(apikey)
+
 
 
 exports.update = ( req, res ) => {
@@ -10,8 +9,6 @@ exports.update = ( req, res ) => {
   User.findOne(res.locals.user._id)
   .exec()
   .then((p) => {
-    console.log("just found a profile")
-    console.dir(p)
     p.userName = req.body.userName
     p.profilePicURL = req.body.profilePicURL
     p.zipcode = req.body.zipcode
@@ -47,7 +44,7 @@ exports.getAllProfiles = ( req, res ) => {
       return [];
     } )
     .then( () => {
-      //console.log( 'skill promise complete' );
+      //log( 'skill promise complete' );
     } );
 };
 
@@ -55,7 +52,6 @@ exports.getAllProfiles = ( req, res ) => {
 exports.getOneProfile = ( req, res ) => {
   //gconsle.log('in getAllSkills')
   const id = req.params.id
-  console.log('the id is '+id)
   User.findOne({_id:id})
     .exec()
     .then( ( profile ) => {

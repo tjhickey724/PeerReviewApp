@@ -42,7 +42,11 @@
                  }
                 numReviews = numReviews + reviews.length
               } %>
-          <tr><td><%= studentsInfo[i].googlename %></td>
+          <tr><td>
+                <a href="/showOneStudentInfo/<%= courseInfo._id %>/<%= studentsInfo[i]._id %>">
+                   <%= studentsInfo[i].googlename %>
+                </a>
+             </td>
               <td><%= studentsInfo[i].googleemail %> </td>
               <td> <%= numAnswers %> </td>
               <td> <%= numReviewed %> </td>

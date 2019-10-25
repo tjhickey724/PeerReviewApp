@@ -15,7 +15,6 @@ exports.saveProblemSet = ( req, res, next ) => {
 
   newProblemSet.save()
     .then( (a) => {
-      console.log('saved a new problem set: '+req.body.name)
       next();
     } )
     .catch( error => {
@@ -27,13 +26,11 @@ exports.saveProblemSet = ( req, res, next ) => {
 
 // this displays all of the skills
 exports.getProblemSets = ( req, res, next ) => {
-  console.log('in getProblemSets')
   if (!req.user) next()
 
   ProblemSet.find({courseId:res.locals.courseInfo._id})
     .exec()
     .then( problemSets => {
-      console.log("adding problemsets: "+problemSets.length)
       res.locals.problemSets = problemSets
       next()
     } )
@@ -41,21 +38,17 @@ exports.getProblemSets = ( req, res, next ) => {
       console.log("Error in getRegistrations: "+ error.message );
       res.send(error)
     } )
-    .then( () => {
-      //console.log( 'skill promise complete' );
-    } );
+
 };
 
 
 // this displays all of the skills
 exports.getProblemSet = ( req, res, next ) => {
-  console.log('in getCourseInfo')
   const id = req.params.psetId
   ProblemSet.findOne({_id:id})
     .exec()
     .then( ( ps ) => {
       res.locals.problemSet = ps
-      console.log(`ps=`+ps)
       next()
     } )
     .catch( ( error ) => {
@@ -67,7 +60,6 @@ exports.getProblemSet = ( req, res, next ) => {
 
 // this displays all of the skills
 exports.getCourseInfo = ( req, res, next ) => {
-  console.log('in getCourseInfo')
   Course.findOne({_id:res.locals.problemSet.courseId})
     .exec()
     .then( ( courseInfo ) => {
@@ -83,28 +75,20 @@ exports.getCourseInfo = ( req, res, next ) => {
 
 // this displays all of the skills
 exports.getProblems = ( req, res, next ) => {
-  console.log('in getProblems')
   const psetId = req.params.psetId
-  console.log('psetId = '+psetId)
   Problem.find({psetId:psetId})
     .exec()
     .then( problems => {
-      console.log("found problems: "+problems.length)
-      console.log("problems = "+JSON.stringify(problems))
-      console.log('psetId = '+psetId)
       res.locals.problems = problems
       res.locals.psetId = psetId
       res.locals.junk = 42
       res.locals.what = {a:5}
-      console.log('res.locals=')
-      //console.dir(res.locals)
       next()
     } )
     .catch( ( error ) => {
       console.log("Error in getProblem: "+ error.message );
       res.send(error)
     } )
-    .then( ()  => console.log("in the then part"))
 
 
 
@@ -112,9 +96,7 @@ exports.getProblems = ( req, res, next ) => {
 
 
 exports.saveProblem = ( req, res, next ) => {
-  console.log("in saveProblem")
   const psetId = req.params.psetId
-  console.log("psetId = "+psetId)
   let newProblem = new Problem(
    {
     courseId: res.locals.problemSet.courseId,
@@ -129,7 +111,6 @@ exports.saveProblem = ( req, res, next ) => {
 
   newProblem.save()
     .then( (p) => {
-      console.log('saved a new problem: '+req.body.description)
       res.locals.problem = p
       next();
     } )

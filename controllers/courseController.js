@@ -93,13 +93,10 @@ exports.getCoursesYouOwn = ( req, res, next ) => {
 exports.addCourseInfo = ( req, res, next ) => {
 
   const id = req.params.courseId
-  console.log('the id is '+id)
   Course.findOne({_id:id})
     .exec()
     .then( ( courseInfo ) => {
       res.locals.courseInfo = courseInfo
-      console.log('courseInfo=')
-      console.dir(courseInfo)
       next()
     } )
     .catch( ( error ) => {
@@ -118,7 +115,6 @@ exports.addCourseFromPin = ( req, res, next ) => {
   Course.findOne({coursePin:coursePin})
     .exec()
     .then( ( courseInfo ) => {
-      console.log("courseInfo = "+courseInfo)
       res.locals.courseInfo = courseInfo
       next()
     } )
@@ -165,8 +161,6 @@ exports.joinCourse = ( req, res, next ) => {
 
   newCourseMember.save()
     .then( (a) => {
-      console.log('joined course: ')
-      console.dir(registration)
       next();
     } )
     .catch( error => {
@@ -182,7 +176,6 @@ exports.getStudentsInCourse = ( req, res, next ) => {
   CourseMember.find({courseId:res.locals.courseInfo._id})
     .exec()
     .then( memberList => {
-      console.log('memberList.length= '+memberList.length)
       res.locals.students = memberList.map((x)=>x.studentId)
       next()
     } )
@@ -198,7 +191,6 @@ exports.getStudentsInfo = ( req, res, next ) => {
     .exec()
     .then( studentsInfo => {
       //console.dir(res.locals.students)
-      console.log('studentsInfo.length ='+studentsInfo.length)
       res.locals.studentsInfo = studentsInfo
       next()
     } )
@@ -224,9 +216,6 @@ exports.createGradeSheet = ( req, res, next ) => {
           {new:true})
     .exec()
     .then((newCourse) => {
-          console.log("in createGradeSheet")
-      console.log(JSON.stringify(newCourse))
-      //res.json(gradeSheet)
       next()
     })
     .catch( (error) => {
@@ -250,33 +239,16 @@ function createGradeSheet(students, problems, answers, reviews){
   for (let a in answers){
     let answer = answers[a]
     try {
-      //answer['reviews']=[]
-      //answer.numReviews=0
-      //console.log('***** ANSWER ****')
-      //console.dir(answer)
+
       answerList[answer._id]= answer
       // it is possible that a TA will not be a student
       // so we need to create a
       gradeSheet[answer.studentId] =
           gradeSheet[answer.studentId] || {status:'non-student',student:'non-student',answers:{}}
-      //gradeSheet[answer.studentId]['answers'] =
-        //gradeSheet[answer.studentId]['answers'] || {}
       gradeSheet[answer.studentId]['answers'][answer._id]
         ={answer:answer, reviews:[]}
     } catch(e){
-      console.log("Error with answer:")
-      console.dir(e)
-      console.log('\n\n\n ************ \n\n\n')
-      console.log('answer._id')
-      console.dir(answer._id)
-      console.log('answer.studentId')
-      console.dir(JSON.stringify(answer.studentId))
-      console.log('gradeSheet[answer.studentId]')
-      console.dir(gradeSheet[answer.studentId.toString()])
-      //console.log("gradeSheet[answer.studentId]['answers']")
-      //console.dir(gradeSheet[answer.studentId.toString()]['answers'])
-      console.log('\n\n#########\n\n')
-      console.dir(JSON.stringify(gradeSheet,null,20))
+      console.log("Error in createGradeSheet: "+error.message+" "+error)
     }
   }
 
@@ -288,17 +260,10 @@ function createGradeSheet(students, problems, answers, reviews){
           ['answers'][review.answerId]
       //z['reviews'] = z['reviews']||[]
       z['reviews'].push(review)
-      //console.log('***** Reviews *****  '+ r)
-      //console.log(JSON.stringify(z,null,20))
-    } catch(error){
-      console.log("Error with reviews:")
-      console.dir(error)
-      console.log('\n\n\n ************ \n\n\n')
-      console.dir(review)
-      console.dir(answerList[review.answerId])
-      console.dir(answerList[review.answerId].studentId)
-      console.dir(gradeSheet[answerList[review.answerId].studentId])
-      //console.dir(gradeSheet)
+    } catch(e){
+      console.log("Error in createGradeSheet-2s: "+error.message+" "+error)
+
+
     }
   }
 

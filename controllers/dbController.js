@@ -1,9 +1,10 @@
 'use strict';
-const Course = require( '../models/Course' );
-const ProblemSet = require( '../models/ProblemSet' );
-const Problem = require( '../models/Problem' );
-const Answer = require('../models/Answer')
-const Review = require('../models/Review')
+const Course     = require('../models/Course' );
+const ProblemSet = require('../models/ProblemSet' );
+const Problem    = require('../models/Problem' );
+const Answer     = require('../models/Answer')
+const Review     = require('../models/Review')
+const User       = require('../models/User')
 
 /*
    Maybe all of these should be in their own controllers,
@@ -14,7 +15,6 @@ const Review = require('../models/Review')
    would look at the Type and use it to do a lookup?
 */
 exports.getReview = ( req, res, next ) => {
-  console.log('in db.getReview')
   const id = req.params.reviewId
   Review.findOne({_id:id})
     .exec()
@@ -23,13 +23,11 @@ exports.getReview = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in db.getReview: "+ error.message );
-      res.send(error)
+      res.send("Error in getReview: "+error)
     } )
 };
 
 exports.getReviews = ( req, res, next ) => {
-  console.log('in db.getReviews')
   const id = req.params.answerId
   Review.find({answerId:id})
     .exec()
@@ -38,14 +36,12 @@ exports.getReviews = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in db.getReviews: "+ error.message );
-      res.send(error)
+      res.send("Error in getReviews: "+error)
     } )
 };
 
 
 exports.getAnswer = ( req, res, next ) => {
-  console.log('in db.getAnswer')
   const id = req.params.answerId
   Answer.findOne({_id:id})
     .exec()
@@ -54,28 +50,23 @@ exports.getAnswer = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in db.getAnswer: "+ error.message );
-      res.send(error)
+      res.send("Error in getAnswer: "+error)
     } )
 };
 
 exports.getProblem = ( req, res, next ) => {
-  //console.log('in db.getProblem')
   const id = req.params.probId
   Problem.findOne({_id:id})
     .exec()
     .then( (problem) => {
-      //console.log('problem = '+problem)
       res.locals.problem = problem
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in db.getProblem: "+ error.message );
-      res.send(error)
+      res.send("Error in getProblem: "+error)
     } )
 };
 exports.getProblemSet = ( req, res, next ) => {
-  console.log('in db.getProblemSet')
   const id = req.params.problemSetId
   Answer.findOne({_id:id})
     .exec()
@@ -84,13 +75,11 @@ exports.getProblemSet = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in db.getProblemSet: "+ error.message );
-      res.send(error)
+      res.send("Error in getProblemSet: "+error)
     } )
 };
 
 exports.getCourse = ( req, res, next ) => {
-  console.log('in db.getCourse')
   const id = req.params.courseId
   Course.findOne({_id:id})
     .exec()
@@ -99,8 +88,7 @@ exports.getCourse = ( req, res, next ) => {
       next()
     } )
     .catch( ( error ) => {
-      console.log("Error in db.getCourse: "+ error.message );
-      res.send(error)
+      res.send("Error in getCourse: "+error)
     } )
 };
 
@@ -121,7 +109,6 @@ exports.getUsersReviews = (req,res,next) => {
     next()
   })
   .catch((error) => {
-    console.log("error in db.getUsersReviews: "+error.message)
     res.send("Error in db.getUsersReviews: "+error.message)
   })
 
@@ -143,8 +130,20 @@ exports.getUsersReviewedAnswers = (req,res,next) => {
     next()
   })
   .catch((error) => {
-    console.log("error in db.getUsersReviewedAnswers: "+error.message)
     res.send("Error in db.getUsersReviewedAnswers: "+error.message)
   })
 
+}
+
+exports.getStudentInfo = (req,res,next) => {
+  User.findOne(
+      {_id:req.params.studentId}
+     )
+  .then(studentInfo => {
+    res.locals.studentInfo = studentInfo
+    next()
+  })
+  .catch((error) => {
+    res.send("Error in db.getStudentInfo: "+error.message)
+  })
 }
