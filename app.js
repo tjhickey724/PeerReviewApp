@@ -78,7 +78,6 @@ app.use((req,res,next) => {
   res.locals.title="Peer Review App"
   res.locals.loggedIn = false
   if (req.isAuthenticated()){
-      console.log("user has been Authenticated")
       res.locals.user = req.user
       res.locals.loggedIn = true
     }
@@ -105,7 +104,6 @@ app.get('/login', function(req,res){
 // route for logging out
 app.get('/logout', function(req, res) {
         req.session.destroy((error)=>{console.log("Error in destroying session: "+error)});
-        console.log("session has been destroyed")
         req.logout();
         res.redirect('/');
     });
@@ -130,15 +128,11 @@ app.get('/login/authorized',
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
-    console.log("checking to see if they are authenticated!")
-    // if user is authenticated in the session, carry on
     res.locals.loggedIn = false
     if (req.isAuthenticated()){
-      console.log("user has been Authenticated")
       res.locals.loggedIn = true
       return next();
     } else {
-      console.log("user has not been authenticated...")
       res.redirect('/login');
     }
 }
@@ -254,11 +248,6 @@ app.get('/reviewAnswers/:probId',
       answerController.getNextAnswer,
       answerController.getReviewsOfAnswer,
       (req,res) => {
-          console.log("###### preparing to render #####")
-          //console.dir(res.locals)
-          console.log("ZZZZZZZZZZZ")
-          console.log(`res.locals.allReviews = ||${res.locals.allReviews}||`)
-
           res.render("reviewAnswer")
         }
     )
@@ -284,6 +273,20 @@ app.get('/showAllStudentInfo/:courseId',
   courseController.createGradeSheet,
   (req,res) => //res.json(res.locals.gradeSheet) //
         res.render("showAllStudentInfo")
+)
+
+app.get('/showOneStudentInfo/:courseId/:studentId',
+  courseController.addCourseInfo,
+  dbController.getStudentInfo,
+  //courseController.getStudentsInCourse,
+  //courseController.getStudentsInfo,
+  //answerController.getAllAnswersForCourse,
+  //problemController.getAllProblemsForCourse,
+  //reviewController.getAllReviewsForCourse,
+  //courseController.createGradeSheet,
+  (req,res) => //res.json(res.locals.gradeSheet) //
+        //res.json(res.locals.courseInfo.gradeSheet)
+        res.render("showOneStudentInfo")
 )
 
 app.get('/showStudentInfo/:courseId',

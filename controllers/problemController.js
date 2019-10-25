@@ -20,7 +20,6 @@ exports.saveAnswer = ( req, res, next ) => {
 
   newAnswer.save()
     .then( (a) => {
-      console.log('saved a new Answer: '+req.body.answer)
       res.locals.answered = true
       res.locals.answer = a
       next();
@@ -33,9 +32,7 @@ exports.saveAnswer = ( req, res, next ) => {
 
 
 exports.getMyAnswerP = ( req, res, next ) => {
-  console.log('in getAnswer')
   const id = req.params.probId
-  console.log(`probId=${id} studentId=${res.locals.user._id}`)
   Answer.find({problemId:id,studentId:res.locals.user._id})
     .exec()
     .then( answers => {
@@ -46,7 +43,6 @@ exports.getMyAnswerP = ( req, res, next ) => {
         res.locals.answered = true
         res.locals.answer = answers[0]
       }
-      console.log(`answer=${res.locals.answer} answered=${res.locals.answered}`)
       next()
     } )
     .catch( ( error ) => {
@@ -59,12 +55,10 @@ exports.getMyAnswerP = ( req, res, next ) => {
 
 
 exports.getProblemP = ( req, res, next ) => {
-  console.log('in getProblem')
   const id = req.params.probId
   Problem.findOne({_id:id})
     .exec()
     .then( (problem) => {
-      console.log("problem= "+problem)
       res.locals.problem = problem
       next()
     } )
@@ -77,7 +71,6 @@ exports.getProblemP = ( req, res, next ) => {
 
 
 exports.getMyReviewsP = ( req, res, next ) => {
-  console.log('in getMyReviews')
   const probId = req.params.probId
   Review.find({reviewerId:req.user._id,problemId:probId})
     .exec()
@@ -94,9 +87,7 @@ exports.getMyReviewsP = ( req, res, next ) => {
 };
 
 exports.getNextAnswerPL = ( req, res, next ) => {
-  console.log('in getNextAnswer')
   const id = req.params.probId
-  console.log(`probId=${id} studentId=${res.locals.user._id}`)
 
   /*
     Here we find an answer for that problem which
@@ -115,7 +106,6 @@ exports.getNextAnswerPL = ( req, res, next ) => {
         res.locals.answered = true
         res.locals.answer = answers[randPos]
       }
-      console.log(`answer=${res.locals.answer} answered=${res.locals.answered}`)
       next()
     } )
     .catch( ( error ) => {
@@ -126,13 +116,9 @@ exports.getNextAnswerPL = ( req, res, next ) => {
 };
 
 exports.getCourseL = ( req, res, next ) => {
-  console.log('in getCourseL')
-  console.log(res.locals.problem)
-  console.log("...")
   Course.findOne({_id:res.locals.problem.courseId})
     .exec()
     .then( (course) => {
-      console.log(course)
       res.locals.course = course
       next()
     } )
@@ -144,7 +130,6 @@ exports.getCourseL = ( req, res, next ) => {
 };
 
 exports.updateProblemLB = ( req, res, next ) => {
-  console.log("in updateProblem")
   let problem = res.locals.problem
   problem.description= req.body.description
   problem.problemText= req.body.problemText
@@ -154,7 +139,6 @@ exports.updateProblemLB = ( req, res, next ) => {
 
   problem.save()
     .then( (p) => {
-      console.log('update a problem: '+req.body.description)
       res.locals.problem = p
       next();
     } )
@@ -166,13 +150,9 @@ exports.updateProblemLB = ( req, res, next ) => {
 };
 
 exports.getProblemSetL = ( req, res, next ) => {
-  console.log('in getProblemSetL')
-  console.log(res.locals.problem)
-  console.log("...")
   ProblemSet.findOne({_id:res.locals.problem.psetId})
     .exec()
     .then( (pset) => {
-      console.log(pset)
       res.locals.problemSet = pset
       next()
     } )
@@ -185,11 +165,9 @@ exports.getProblemSetL = ( req, res, next ) => {
 
 
 exports.getAnswerCountL = ( req, res, next ) => {
-  console.log('in countAnswersL')
   Answer.countDocuments({problemId:res.locals.problem._id})
     .exec()
     .then( (num) => {
-      console.log('answerCount='+num)
       res.locals.answerCount=num
       next()
     } )
@@ -201,11 +179,9 @@ exports.getAnswerCountL = ( req, res, next ) => {
 };
 
 exports.getReviewCountL = ( req, res, next ) => {
-  console.log('in countAnswersL')
   Review.countDocuments({problemId:res.locals.problem._id})
     .exec()
     .then( (num) => {
-      console.log('reviewCount='+num)
       res.locals.reviewCount=num
       next()
     } )
@@ -223,7 +199,6 @@ exports.getAverageReviewL = ( req, res, next ) => {
     .then( reviews => {
       let sum = reviews.reduce((t,x)=>t+x.points,0)
       res.locals.averageReview=sum/reviews.length
-      console.log("average review = "+sum+"/"+reviews.length)
       next()
     } )
     .catch( ( error ) => {
@@ -241,7 +216,6 @@ exports.getAnswers = ( req, res, next ) => {
     .sort({answer:1})
     .exec()
     .then( answers => {
-      console.log("answers = "+answers)
       res.locals.answers = answers
       next()
     } )
@@ -258,7 +232,6 @@ exports.getReviews = ( req, res, next ) => {
   Review.find({problemId:id})
     .exec()
     .then( reviews => {
-      console.log("reviews = "+reviews)
       res.locals.reviews = reviews
       next()
     } )
