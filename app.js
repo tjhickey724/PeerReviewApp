@@ -205,10 +205,15 @@ app.post('/updateProblem/:probId',
     problemController.getCourseL,
     answerController.getAnswer,
     problemController.updateProblemLB,
-    dbController.getProblem,
+    (req,res) => res.redirect("/showProblem/"+req.params.probId)
+    /*dbController.getProblem,
+    problemController.getAnswerCountL,
+    problemController.getReviewCountL,
+    problemController.getAverageReviewL,
     //problemController.getProblemSetL,
     //problemSetController.getProblems,
     (req,res) => res.render("showProblem",{probId:req.params.probId})
+    */
   )
 app.get('/showProblem/:probId',
       answerController.getAnswer,
