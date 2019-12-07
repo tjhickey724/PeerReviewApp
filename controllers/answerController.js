@@ -253,3 +253,66 @@ exports.getAllAnswersForCourse = ( req, res, next ) => {
     } )
 
 };
+
+exports.getAnswerToReview = async (req,res,next) => {
+ try{
+  // this selects the problem with the fewest reviews which hasn't been reviewed
+  // by this user.
+  // First though it finds answers that haven't been reviewed at all...
+  // If the user has reviewed all of the answers, it returns ...
+  const probId = req.params.probId
+
+  res.locals.problem = await Problem.findOne({_id:probId})
+  res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
+  res.locals.course.gradeSheet = {}
+
+  // get all of my reviews of the current problem
+  const myReviews = await Review.find({reviewerId:req.user._id,problemId:probId})
+  const myReviewedAnswerIds = myReviews.map((x)=>x.answerId)
+  res.locals.numReviewsByMe = myReviews.length
+  // find all answers I haven't reviewed, sorted by number of reviews
+
+  const allAnswers =
+      await Answer.find({},{_id:1})
+
+  const answersToReview =
+     await Review.aggregate(
+       [{$match:{problemId:res.locals.problem._id,
+                 answerId:{$nin:myReviewedAnswerIds}}},
+        {$sortByCount:"$answerId"}])
+
+  res.locals.answer = false
+
+  for (let i = 0; i<allAnswerIds.length; i++){
+    let a = allAnswers[i]._id
+    if ( !(a in answersToReview)
+           &&
+         !(a in myReviewedAnswerIds)
+       ) {
+          res.locals.answer = a
+          break
+         }
+  }
+  if (res.locals.answer){
+    console.log("case 1:"+res.locals.answer)
+    next()
+  } else if (answersToReview.length == 0){
+    res.locals.answer=false
+    console.log("case 2:"+res.locals.answer)
+    next()
+  } else {
+    res.locals.answer = answersToReview[answersToReview.length-1]
+    console.log("case 3:"+res.locals.answer)
+    next()
+  }
+ } catch(error){
+  console.log("error in getAnswerToReview: "+error)
+  res.send("error in getAnswerToReview: "+error)
+ }
+}
+/* dbController.getProblem,
+answerController.getMyReviews,
+answerController.getReviews,
+answerController.getNextAnswer0,
+answerController.getNextAnswer,
+answerController.getReviewsOfAnswer,*/

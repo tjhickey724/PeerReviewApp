@@ -5,7 +5,7 @@
     <h3><%= problem.description %></h3>
     <b>The Question</b>
     <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
-    <% if (answered) { %>
+    <% if (answer) { %>
         <hr>
         <b>Their Answer</b>
         <small>Submission time and date:<%= answer.createdAt %> </small>
@@ -14,10 +14,9 @@
 
 
         <b>Your Review</b>
-        You have reviewed <%= reviewedAnswers.length %> answers for this problem
+        You have reviewed <%= numReviewsByMe %> answers for this problem
         <br>
 
-        This problem has <%= allReviews.length %> reviews already.
         <div class="row">
             <div class="col-md-6">
 

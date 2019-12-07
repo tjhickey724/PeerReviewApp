@@ -257,3 +257,32 @@ exports.getAllProblemsForCourse = ( req, res, next ) => {
     } )
 
 };
+
+exports.getProblemInfo = async (req, res, next) => {
+  try {
+    const probId = req.params.probId
+    res.locals.problem = await Problem.findOne({_id:probId})
+    res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
+    res.locals.course.gradeSheet = {}
+    res.locals.answerCount = await Answer.countDocuments({problemId:probId})
+    const reviews = await Review.find({problemId:probId})
+    res.locals.reviewCount = reviews.length
+    res.locals.averageReview=
+        reviews.reduce((t,x)=>t+x.points,0)/reviews.length
+    res.locals.answers = await Answer.find({problemId:probId,studentId:res.locals.user._id})
+    console.log('res.locals=')
+    console.log(JSON.stringify(res.locals,null,5))
+    next()
+  } catch (e) {
+        console.log("Error in showProblem: "+e)
+        res.send("Error in showProblem: "+e)
+  }
+
+
+}
+/* answerController.getAnswer,
+dbController.getProblem,
+problemController.getAnswerCountL,
+problemController.getReviewCountL,
+problemController.getAverageReviewL,
+problemController.getCourseL, */

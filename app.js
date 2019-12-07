@@ -189,6 +189,7 @@ app.get('/showProblemSet/:psetId',
       problemSetController.getCourseInfo,
       (req,res) => res.render('showProblemSet'))
 
+
 app.get('/addProblem/:psetId',
       (req,res) => res.render("addProblem",{psetId:req.params.psetId})
     )
@@ -215,7 +216,7 @@ app.post('/updateProblem/:probId',
     (req,res) => res.render("showProblem",{probId:req.params.probId})
     */
   )
-app.get('/showProblem/:probId',
+app.get('/showProblem0/:probId',
       answerController.getAnswer,
       dbController.getProblem,
       problemController.getAnswerCountL,
@@ -224,6 +225,11 @@ app.get('/showProblem/:probId',
       problemController.getCourseL,
       (req,res) => res.render("showProblem",{probId:req.params.probId})
     )
+
+app.get('/showProblem/:probId',
+    problemController.getProblemInfo,
+    (req,res) => res.render("showProblem",{probId:req.params.probId})
+  )
 
 app.get('/showAllAnswers/:probId',
       dbController.getProblem,
@@ -256,6 +262,20 @@ app.get('/reviewAnswers/:probId',
           res.render("reviewAnswer")
         }
     )
+
+app.get('/reviewAnswersTEST/:probId',
+    answerController.getAnswerToReview,
+    /* dbController.getProblem,
+    answerController.getMyReviews,
+    answerController.getReviews,
+    answerController.getNextAnswer0,
+    answerController.getNextAnswer,
+    answerController.getReviewsOfAnswer,*/
+    (req,res) => {
+        res.render("reviewAnswer")
+      }
+  )
+
 
 app.post('/saveReview/:probId/:answerId',
     dbController.getProblem,

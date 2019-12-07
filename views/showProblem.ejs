@@ -26,23 +26,25 @@
 
     <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
     <hr>
-    <% if (answered || course.ownerId.equals(user._id)) { %>
+    <% console.log("answers= "+answers+" answers.length>0 = "+(answers.length>0)) %>
+    <% if (answers.length > 0 || course.ownerId.equals(user._id)) { %>
+        <% if (!course.ownerId.equals(user._id)) { %>
             <h2>Your Answer</h2>
             <small>Submission time and date:<%= problem.createdAt %> </small>
-            <pre class="bg-success      "><%= answer.answer %></pre>
+            <pre class="bg-success      "><%= answers[0].answer %></pre>
             <br>
-            <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
-            <% if (!course.ownerId.equals(user._id)) {%>
-                <a href="/showReviewsOfAnswer/<%= answer._id %>" class="btn btn-small btn-info">Reviews of your answer</a>
-            <% } %>
-            <a href="/showReviewsByUser/<%= problem._id %>" class="btn btn-small btn-info">Your Reviews of other's answers</a>
-            <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
+        <% } %>
+        <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
+        <% if (!course.ownerId.equals(user._id)) {%>
+            <a href="/showReviewsOfAnswer/<%= answers[0]._id %>" class="btn btn-small btn-info">Reviews of your answer</a>
+        <% } %>
+        <a href="/showReviewsByUser/<%= problem._id %>" class="btn btn-small btn-info">Your Reviews of other's answers</a>
+        <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
         <% if (course.ownerId.equals(user._id)) { %>
             <br>
             <a href="/showAllAnswers/<%= problem._id %>" class="btn btn-small btn-danger">Show all answers</a>
+        <%} %>
 
-
-            <%} %>
     <% } else { %>
             <form method="post" action="/saveAnswer/<%= problem._id %>">
                     <div class="form-group">
