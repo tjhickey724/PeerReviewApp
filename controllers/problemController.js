@@ -275,7 +275,8 @@ exports.getProblemInfo = async (req, res, next) => {
     next()
   } catch (e) {
         console.log("Error in showProblem: "+e)
-        res.send("Error in showProblem: "+e)
+        //res.send("Error in showProblem: "+e)
+        next(e)
   }
 
 

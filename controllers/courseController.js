@@ -1,6 +1,7 @@
 'use strict';
 const Course = require( '../models/Course' );
 const CourseMember = require( '../models/CourseMember' );
+const User = require( '../models/User' );
 
 //good
 exports.createCourse = ( req, res, next ) => {
