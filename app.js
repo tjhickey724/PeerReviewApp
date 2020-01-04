@@ -217,9 +217,6 @@ async function getCoursePin(){
 
 
 
-
-
-
 app.get('/showCourse/:courseId',
   async ( req, res, next ) => {
     try {
@@ -491,7 +488,7 @@ app.post('/saveAnswer/:probId',
   }
 )
 
-app.get('/reviewAnswers/:probId',
+app.get('/reviewAnswers0/:probId',
       dbController.getProblem,
       answerController.getMyReviews,
       answerController.getReviews,
@@ -502,6 +499,38 @@ app.get('/reviewAnswers/:probId',
           res.render("reviewAnswer")
         }
     )
+
+app.get('/reviewAnswers/:probId',
+      async ( req, res, next ) => {
+        const id = req.params.probId
+        res.locals.problem = await Problem.findOne({_id:id})
+
+        // use mongoose selection feature to only pull selected fields
+        let reviews = await Review.find({reviewerId:req.user._id,problemId:id})
+        res.locals.reviewedAnswers = reviews.map((r)=>r.answerId)
+
+        let answers = Answer.find({problemId:id,
+               _id:{$not:{$in:res.locals.allReviewedAnswers},
+                    $not:{$in:res.locals.reviewedAnswers}   }
+                  })
+            .exec()
+        res.locals.answers = answers.map((x)=>x.answer)
+
+        if (answers.length==0){
+          res.locals.answered = false
+          res.locals.answer={}
+        } else {
+          const randPos =
+             Math.floor(Math.random() * answers.length)
+          res.locals.answered = true
+          res.locals.answer = answers[randPos]
+        }
+
+        res.render("reviewAnswer")
+      }
+)
+
+
 
 app.get('/reviewAnswersTEST/:probId',
     answerController.getAnswerToReview,
