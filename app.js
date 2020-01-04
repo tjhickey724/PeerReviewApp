@@ -33,13 +33,15 @@ db.once('open', function() {
   console.log("we are connected!!!")
 });
 
+console.log("removed the controllers!")
+/*
 const dbController = require('./controllers/dbController')
 const courseController = require('./controllers/courseController')
 const problemSetController = require('./controllers/problemSetController')
 const problemController = require('./controllers/problemController')
 const answerController = require('./controllers/answerController')
 const reviewController = require('./controllers/reviewController')
-
+*/
 // Authentication
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 // here we set up authentication with passport
@@ -238,13 +240,6 @@ app.get('/showCourse/:courseId',
 
 
 
-app.post('/joinCourse0',
-      courseController.addCourseFromPin,
-      courseController.checkEnrollment,
-      problemSetController.getProblemSets,
-      courseController.joinCourse,
-      (req,res) => res.render("showCourse")
-    )
 
 app.post('/joinCourse',
   async (req, res, next ) => {
@@ -488,18 +483,6 @@ app.post('/saveAnswer/:probId',
   }
 )
 
-app.get('/reviewAnswers0/:probId',
-      dbController.getProblem,
-      answerController.getMyReviews,
-      answerController.getReviews,
-      answerController.getNextAnswer0,
-      answerController.getNextAnswer,
-      answerController.getReviewsOfAnswer,
-      (req,res) => {
-          res.render("reviewAnswer")
-        }
-    )
-
 app.get('/reviewAnswers1/:probId',
       async ( req, res, next ) => {
         const id = req.params.probId
@@ -578,13 +561,34 @@ app.get('/reviewAnswers/:probId',
   )
 
 
-  app.post('/saveReview/:probId/:answerId',
-      dbController.getProblem,
-      answerController.saveReview,
-      (req,res) => {
-        res.redirect('/reviewAnswers/'+req.params.probId)}
-    )
+app.post('/saveReview/:probId/:answerId',
+  async ( req, res, next ) => {
+    try {
+      const problem =
+          await Problem.findOne({_id:req.params.probId})
 
+      const newReview = new Review(
+       {
+        reviewerId:req.user._id,
+        courseId:problem.courseId,
+        psetId:problem.psetId,
+        problemId:problem._id,
+        answerId:req.params.answerId,
+        review:req.body.review,
+        points:req.body.points,
+        createdAt: new Date()
+       }
+      )
+
+      await newReview.save()
+
+      res.redirect('/reviewAnswers/'+req.params.probId)
+    }
+    catch(e){
+      next(e)
+    }
+  }
+)
 
 app.get('/showReviewsOfAnswer/:answerId',
   async ( req, res, next ) => {
@@ -624,45 +628,91 @@ app.get('/showReview/:reviewId',
 )
 
 
-
-
 app.get('/showAllStudentInfo/:courseId',
-  courseController.addCourseInfo,
-  courseController.getStudentsInCourse,
-  courseController.getStudentsInfo,
-  answerController.getAllAnswersForCourse,
-  problemController.getAllProblemsForCourse,
-  reviewController.getAllReviewsForCourse,
-  courseController.createGradeSheet,
-  (req,res) => //res.json(res.locals.gradeSheet) //
-        res.render("showAllStudentInfo")
-)
-
-app.get('/showOneStudentInfo/:courseId/:studentId',
-  courseController.addCourseInfo,
-  dbController.getStudentInfo,
-  //courseController.getStudentsInCourse,
-  //courseController.getStudentsInfo,
-  //answerController.getAllAnswersForCourse,
-  //problemController.getAllProblemsForCourse,
-  //reviewController.getAllReviewsForCourse,
-  //courseController.createGradeSheet,
-  (req,res) => //res.json(res.locals.gradeSheet) //
-        //res.json(res.locals.courseInfo.gradeSheet)
-        res.render("showOneStudentInfo")
+  (req,res) => {
+    res.redirect('/showTheStudentInfo/all/'+req.params.courseId)
+  }
 )
 
 app.get('/showStudentInfo/:courseId',
-  courseController.addCourseInfo,
-  courseController.getStudentsInCourse,
-  courseController.getStudentsInfo,
-  answerController.getAllAnswersForCourse,
-  problemController.getAllProblemsForCourse,
-  reviewController.getAllReviewsForCourse,
-  courseController.createGradeSheet,
-  (req,res) => //res.json(res.locals.gradeSheet) //
-        res.render("showStudentInfo")
+  (req,res) => {
+    res.redirect('/showTheStudentInfo/summary/'+req.params.courseId)
+  }
 )
+
+app.get('/showTheStudentInfo/:option/:courseId',
+  async ( req, res, next ) => {
+    try {
+        const id = req.params.courseId
+        // get the courseInfo
+        res.locals.courseInfo =
+            await Course.findOne({_id:id})
+
+        // get the list of ids of students in the course
+        const memberList =
+            await CourseMember.find({courseId:res.locals.courseInfo._id})
+        res.locals.students = memberList.map((x)=>x.studentId)
+
+        res.locals.studentsInfo =
+            await User.find({_id:{$in:res.locals.students}})
+
+        const courseId = res.locals.courseInfo._id
+        res.locals.answers =
+            await Answer.find({courseId:courseId})
+
+        res.locals.problems =
+            await Problem.find({courseId:courseId})
+
+        res.locals.reviews =
+            await Review.find({courseId:courseId})
+
+        const gradeSheet =
+           createGradeSheet(
+             res.locals.studentsInfo,
+             res.locals.problems,
+             res.locals.answers,
+             res.locals.reviews)
+        //console.log("creating Gradesheet")
+        //console.dir(gradeSheet)
+
+        res.locals.gradeSheet = gradeSheet
+
+        await Course.findOneAndUpdate(
+                {_id:courseId},
+                {$set:{gradeSheet:gradeSheet,gradesUpdateTime:new Date()}},
+                {new:true})
+
+        console.log(`option = ${req.params.option}`)
+
+        if (req.params.option == 'all'){
+          res.render("showAllStudentInfo")
+        } else {
+          res.render("showStudentInfo")
+        }
+      }
+    catch(e){
+        next(e)
+      }
+    }
+)
+
+
+
+app.get('/showOneStudentInfo/:courseId/:studentId',
+  async (req, res, next) => {
+    try {
+      res.locals.courseInfo =
+          await Course.findOne({_id:req.params.courseId})
+      res.locals.studentInfo =
+          await User.findOne({_id:req.params.studentId})
+      res.render("showOneStudentInfo")
+    }
+    catch(e){
+      next(e)
+    }
+  }
+)
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -679,5 +729,53 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+function createGradeSheet(students, problems, answers, reviews){
+  let gradeSheet = {}
+  let problemList = {}
+  let answerList={}
+  for (let s in students){
+    let student = students[s]
+    gradeSheet[student._id]={student:student,answers:{}}
+  }
+  for (let p in problems){
+    let problem = problems[p]
+    problemList[problem._id]=problem
+  }
+  for (let a in answers){
+    let answer = answers[a]
+    try {
+
+      answerList[answer._id]= answer
+      // it is possible that a TA will not be a student
+      // so we need to create a
+      gradeSheet[answer.studentId] =
+          gradeSheet[answer.studentId] || {status:'non-student',student:'non-student',answers:{}}
+      gradeSheet[answer.studentId]['answers'][answer._id]
+        ={answer:answer, reviews:[]}
+    } catch(e){
+      console.log("Error in createGradeSheet: "+error.message+" "+error)
+    }
+  }
+
+  for (let r in reviews) {
+    let review = reviews[r]
+    try {
+      let z =
+        gradeSheet[answerList[review.answerId].studentId]
+          ['answers'][review.answerId]
+      //z['reviews'] = z['reviews']||[]
+      z['reviews'].push(review)
+    } catch(e){
+      console.log("Error in createGradeSheet-2s: "+error.message+" "+error)
+
+
+    }
+  }
+
+
+  return {grades:gradeSheet,problems:problemList,answers:answerList}
+}
 
 module.exports = app;
