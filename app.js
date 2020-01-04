@@ -578,24 +578,50 @@ app.get('/reviewAnswers/:probId',
   )
 
 
-app.post('/saveReview0/:probId/:answerId',
-    dbController.getProblem,
-    answerController.saveReview,
-    answerController.getMyReviews,
-    answerController.getNextAnswer0,
-    answerController.getNextAnswer,
-    answerController.getReviewsOfAnswer,
-    (req,res) =>
-      res.render("reviewAnswer")
-  )
-
-
   app.post('/saveReview/:probId/:answerId',
       dbController.getProblem,
       answerController.saveReview,
       (req,res) => {
         res.redirect('/reviewAnswers/'+req.params.probId)}
     )
+
+
+app.get('/showReviewsOfAnswer/:answerId',
+  async ( req, res, next ) => {
+    try {
+      const id = req.params.answerId
+      res.locals.answer = await Answer.findOne({_id:id})
+      res.locals.reviews = await Review.find({answerId:id})
+      res.render("showReviewsOfAnswer")
+      }
+    catch(e){
+        next(e)
+      }
+    }
+)
+
+
+app.get('/showReviewsByUser/:probId',
+  async ( req, res, next ) => {
+      const id = req.params.probId
+      res.locals.problem = await Problem.findOne({_id:id})
+      res.locals.usersReviews =
+          await Review.find(
+                            {reviewerId:req.user._id,
+                             problemId:res.locals.problem._id}
+                           )
+      const answerIds = res.locals.usersReviews.map((r)=>r.answerId)
+      res.locals.usersReviewedAnswers = await Answer.find(
+         {_id:{$in:answerIds}}
+        )
+
+      res.render("showReviewsByUser")
+    }
+)
+
+app.get('/showReview/:reviewId',
+  (req,res) => res.send("Under Construction")
+)
 
 
 
@@ -637,24 +663,6 @@ app.get('/showStudentInfo/:courseId',
   (req,res) => //res.json(res.locals.gradeSheet) //
         res.render("showStudentInfo")
 )
-
-app.get('/showReviewsOfAnswer/:answerId',
-  dbController.getAnswer,
-  dbController.getReviews,
-  (req,res) => res.render("showReviewsOfAnswer")
-)
-
-app.get('/showReviewsByUser/:probId',
-  dbController.getProblem,
-  dbController.getUsersReviews,
-  dbController.getUsersReviewedAnswers,
-  (req,res) => res.render("showReviewsByUser")
-)
-
-app.get('/showReview/:reviewId',
-  (req,res) => res.send("Under Construction")
-)
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
