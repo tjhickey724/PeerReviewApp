@@ -256,24 +256,25 @@ exports.getAllAnswersForCourse = ( req, res, next ) => {
 
 exports.getAnswerToReview = async (req,res,next) => {
  try{
-  // this selects the problem with the fewest reviews which hasn't been reviewed
-  // by this user.
+  // this selects the problem with the fewest reviews
+  // which hasn't been reviewed by this user.
   // First though it finds answers that haven't been reviewed at all...
   // If the user has reviewed all of the answers, it returns ...
   const probId = req.params.probId
-
+  // first find the problem and course for this problemId
   res.locals.problem = await Problem.findOne({_id:probId})
   res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
   res.locals.course.gradeSheet = {}
 
-  // get all of my reviews of the current problem
+  // next, get the answers for this problem that I have reviewed
   const myReviews = await Review.find({reviewerId:req.user._id,problemId:probId})
   const myReviewedAnswerIds = myReviews.map((x)=>x.answerId)
   res.locals.numReviewsByMe = myReviews.length
   // find all answers I haven't reviewed, sorted by number of reviews
 
+  // next, get the all the answers to the problem
   const allAnswers =
-      await Answer.find({},{_id:1})
+      await Answer.find({problemId:probId})
 
   const answersToReview =
      await Review.aggregate(
@@ -281,15 +282,29 @@ exports.getAnswerToReview = async (req,res,next) => {
                  answerId:{$nin:myReviewedAnswerIds}}},
         {$sortByCount:"$answerId"}])
 
-  res.locals.answer = false
+  console.log("inside reviewAnswers:")
+  console.dir("atr.len="+answersToReview.length)
 
-  for (let i = 0; i<allAnswerIds.length; i++){
+  for(let j=0; j<answersToReview.length; j++){
+    console.log(j)
+    console.dir(answersToReview[j])
+  }
+
+  res.locals.answer = false
+  console.log("allAnswers and answers to Review and answers I reviewed")
+  console.dir(allAnswers.map(a => a._id))
+  console.dir(answersToReview)
+  console.dir(myReviewedAnswerIds)
+
+  for (let i = 0; i<allAnswers.length; i++){
     let a = allAnswers[i]._id
+    console.log(i+" "+a)
     if ( !(a in answersToReview)
            &&
          !(a in myReviewedAnswerIds)
        ) {
-          res.locals.answer = a
+         console.log("found an answer: "+a)
+          res.locals.answer = allAnswers[i]
           break
          }
   }

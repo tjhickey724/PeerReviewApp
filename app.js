@@ -500,7 +500,7 @@ app.get('/reviewAnswers0/:probId',
         }
     )
 
-app.get('/reviewAnswers/:probId',
+app.get('/reviewAnswers1/:probId',
       async ( req, res, next ) => {
         const id = req.params.probId
         res.locals.problem = await Problem.findOne({_id:id})
@@ -532,21 +532,88 @@ app.get('/reviewAnswers/:probId',
 
 
 
-app.get('/reviewAnswersTEST/:probId',
-    answerController.getAnswerToReview,
-    /* dbController.getProblem,
-    answerController.getMyReviews,
-    answerController.getReviews,
-    answerController.getNextAnswer0,
-    answerController.getNextAnswer,
-    answerController.getReviewsOfAnswer,*/
-    (req,res) => {
+app.get('/reviewAnswers/:probId',
+    async (req,res,next) => {
+      try{
+        // this selects the problem with the fewest reviews
+        // which hasn't been reviewed by this user.
+        // First though it finds answers that haven't been reviewed at all...
+        // If the user has reviewed all of the answers, it returns ...
+        const probId = req.params.probId
+        // first find the problem and course for this problemId
+        res.locals.problem = await Problem.findOne({_id:probId})
+        res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
+        res.locals.course.gradeSheet = {}
+
+        // next, get the answers for this problem that I have reviewed
+        const myReviews = await Review.find({reviewerId:req.user._id,problemId:probId})
+        const myReviewedAnswerIds = myReviews.map((x)=>x.answerId)
+        res.locals.numReviewsByMe = myReviews.length
+        // find all answers I haven't reviewed, sorted by number of reviews
+
+        // next, get the all the answers to the problem
+        const allAnswers =
+            await Answer.find({problemId:probId})
+
+        const answersToReview =
+           await Review.aggregate(
+             [{$match:{problemId:res.locals.problem._id,
+                       answerId:{$nin:myReviewedAnswerIds}}},
+              {$sortByCount:"$answerId"}])
+
+        console.log("inside reviewAnswers:")
+        console.dir("atr.len="+answersToReview.length)
+
+        for(let j=0; j<answersToReview.length; j++){
+          console.log(j)
+          console.dir(answersToReview[j])
+        }
+        if (answersToReview.length==0) {
+          res.locals.answer = false
+        } else {
+          // even better would be to find all answers with the minimum
+          // number of reviews and randomly select one
+          res.locals.answerId = answersToReview[answersToReview.length-1]
+          res.locals.answer = await Answer.findOne({_id:res.locals.answerId})
+        }
+
+        console.log("allAnswers and answers to Review and answers I reviewed")
+        console.dir(allAnswers.map(a => a._id))
+        console.dir(answersToReview)
+        console.dir(myReviewedAnswerIds)
+/*
+        for (let i = 0; i<allAnswers.length; i++){
+          let a = allAnswers[i]._id
+          console.log(i+" "+a)
+          if ( !(a in answersToReview)
+                 &&
+               !(a in myReviewedAnswerIds)
+             ) {
+               console.log("found an answer: "+a)
+                res.locals.answer = allAnswers[i]
+                break
+               }
+        }
+        */
+        if (res.locals.answer){
+          console.log("case 1:"+res.locals.answer)
+        } else if (answersToReview.length == 0){
+          res.locals.answer=false
+          console.log("case 2:"+res.locals.answer)
+        } else {
+          res.locals.answer = answersToReview[answersToReview.length-1]
+          console.log("case 3:"+res.locals.answer)
+        }
         res.render("reviewAnswer")
+      }catch(error){
+          console.log("error in getAnswerToReview: "+error)
+          res.send("error in getAnswerToReview: "+error)
       }
+    }
   )
 
 
-app.post('/saveReview/:probId/:answerId',
+app.post('/saveReview0/:probId/:answerId',
     dbController.getProblem,
     answerController.saveReview,
     answerController.getMyReviews,
@@ -556,6 +623,17 @@ app.post('/saveReview/:probId/:answerId',
     (req,res) =>
       res.render("reviewAnswer")
   )
+
+
+  app.post('/saveReview/:probId/:answerId',
+      dbController.getProblem,
+      answerController.saveReview,
+      (req,res) => {
+        res.redirect('/reviewAnswers/'+req.params.probId)}
+    )
+
+
+
 
 app.get('/showAllStudentInfo/:courseId',
   courseController.addCourseInfo,
