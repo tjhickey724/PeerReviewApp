@@ -155,14 +155,17 @@ app.get('/',
 
       if (!req.user) next()
 
-      let coursesOwned = await Course.find({ownerId:req.user._id})
+      let coursesOwned =
+          await Course.find({ownerId:req.user._id},'name')
       res.locals.coursesOwned = coursesOwned
       res.locals.coursesTAing = []
 
-      let registrations = await  CourseMember.find({studentId:req.user._id})
+      let registrations =
+          await  CourseMember.find({studentId:req.user._id},'courseId')
       res.locals.registeredCourses = registrations.map((x)=>x.courseId)
 
-      let coursesTaken = await Course.find({_id:{$in:res.locals.registeredCourses}})
+      let coursesTaken =
+          await Course.find({_id:{$in:res.locals.registeredCourses}},'name')
       res.locals.coursesTaken = coursesTaken
 
       res.locals.title = "PRA"
@@ -208,11 +211,11 @@ async function getCoursePin(){
   // this only works if there are many fewer than 10000000 courses
   // but that won't be an issue with this alpha version!
   let coursePin =  Math.floor(Math.random()*10000000)
-  let lookupPin = await Course.find({coursePin:coursePin})
+  let lookupPin = await Course.find({coursePin:coursePin},'coursePin')
   console.log("picking coursePin="+coursePin+" duplicates? "+lookupPin.length)
   while (lookupPin.length>0) {
     coursePin =  Math.floor(Math.random()*10000000)
-    lookupPin = await Course.find({coursePin:coursePin})
+    lookupPin = await Course.find({coursePin:coursePin},'coursePin')
   }
   return coursePin
 }
@@ -223,7 +226,7 @@ app.get('/showCourse/:courseId',
   async ( req, res, next ) => {
     try {
       const id = req.params.courseId
-      res.locals.courseInfo = await Course.findOne({_id:id})
+      res.locals.courseInfo = await Course.findOne({_id:id},'name coursePin ownerId')
 
       const memberList = await CourseMember.find({studentId:req.user._id,courseId:res.locals.courseInfo._id})
       res.locals.isEnrolled = (memberList.length > 0)
@@ -247,12 +250,15 @@ app.post('/joinCourse',
       let coursePin = req.body.coursePin
       console.log(`coursePin=${coursePin}`)
 
-      res.locals.courseInfo = await Course.findOne({coursePin:coursePin})
+      res.locals.courseInfo =
+          await Course.findOne({coursePin:coursePin},'name coursePin ownerId')
 
-      const memberList = await CourseMember.find({studentId:req.user._id,courseId:res.locals.courseInfo._id})
+      const memberList =
+          await CourseMember.find({studentId:req.user._id,courseId:res.locals.courseInfo._id})
       res.locals.isEnrolled = (memberList.length > 0)
 
-      res.locals.problemSets = await ProblemSet.find({courseId:res.locals.courseInfo._id})
+      res.locals.problemSets =
+          await ProblemSet.find({courseId:res.locals.courseInfo._id})
 
       let registration =
         {
@@ -264,13 +270,8 @@ app.post('/joinCourse',
       let newCourseMember = new CourseMember(registration)
 
       await newCourseMember.save()
-        .then( (a) => {
-          res.render("showCourse")
-        } )
-        .catch( error => {
-          console.log("Error while saving courseMember:"+error.message)
-          res.send( error );
-        } );
+
+      res.render("showCourse")
 
     }
     catch(e){
@@ -285,8 +286,12 @@ app.post('/joinCourse',
 app.get('/addProblemSet/:courseId',
   async ( req, res, next ) => {
       const id = req.params.courseId
-      res.locals.courseInfo = await Course.findOne({_id:id})
-      res.render("addProblemSet")
+      const courseInfo =
+          await Course.findOne({_id:id},'name ownerId')
+      res.render("addProblemSet",
+                  {name:courseInfo.name,
+                   ownerId:courseInfo.ownerId,
+                   courseId:courseInfo._id})
     }
 )
 
@@ -305,7 +310,8 @@ app.post('/saveProblemSet/:courseId',
       console.log(JSON.stringify(newProblemSet))
       await newProblemSet.save()
 
-      res.locals.courseInfo = await Course.findOne({_id:id})
+      res.locals.courseInfo =
+          await Course.findOne({_id:id},'name coursePin ownerId')
       console.log("got course info")
       res.locals.problemSets =
         await ProblemSet.find({courseId:res.locals.courseInfo._id})
@@ -322,9 +328,13 @@ app.get('/showProblemSet/:psetId',
   async ( req, res, next ) => {
     const psetId = req.params.psetId
     res.locals.psetId = psetId
-    res.locals.problemSet = await ProblemSet.findOne({_id:psetId})
-    res.locals.problems = await Problem.find({psetId:psetId})
-    res.locals.courseInfo = await Course.findOne({_id:res.locals.problemSet.courseId})
+    res.locals.problemSet =
+        await ProblemSet.findOne({_id:psetId})
+    res.locals.problems =
+        await Problem.find({psetId:psetId})
+    res.locals.courseInfo =
+        await Course.findOne({_id:res.locals.problemSet.courseId},
+                              'ownerId')
     res.render('showProblemSet')
   }
 )
@@ -358,7 +368,9 @@ app.post('/saveProblem/:psetId',
             } )
 
         res.locals.problems = await Problem.find({psetId:psetId})
-        res.locals.courseInfo = await Course.findOne({_id:res.locals.problemSet.courseId})
+        res.locals.courseInfo =
+            await Course.findOne({_id:res.locals.problemSet.courseId},
+                                  'ownerId')
         res.render("showProblemSet")
       }
     catch(e){
@@ -370,28 +382,16 @@ app.post('/saveProblem/:psetId',
 app.post('/updateProblem/:probId',
   async ( req, res, next ) => {
     try {
-      const id = req.params.probId
-      res.locals.problem = await Problem.findOne({_id:id})
-      res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
-      let answers = await Answer.find({problemId:id,studentId:res.locals.user._id})
-      if (answers.length==0){
-        res.locals.answered = false
-        res.locals.answer=""
-      } else {
-        res.locals.answered = true
-        res.locals.answer = answers[0]
-      }
-      let problem = res.locals.problem
+      const problem =
+          await Problem.findOne({_id:req.params.probId})
+
       problem.description= req.body.description
       problem.problemText= req.body.problemText
       problem.points= req.body.points
       problem.rubric= req.body.rubric
       problem.createdAt =  new Date()
 
-      problem.save()
-        .then( (p) => {
-          res.locals.problem = p
-        } )
+      await problem.save()
 
       res.redirect("/showProblem/"+req.params.probId)
     }
@@ -408,16 +408,16 @@ app.get('/showProblem/:probId',
           const probId = req.params.probId
           res.locals.probId = probId
           res.locals.problem = await Problem.findOne({_id:probId})
-          res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
-          res.locals.course.gradeSheet = {}
+          res.locals.course =
+              await Course.findOne({_id:res.locals.problem.courseId},
+                                    'ownerId')
           res.locals.answerCount = await Answer.countDocuments({problemId:probId})
           const reviews = await Review.find({problemId:probId})
           res.locals.reviewCount = reviews.length
           res.locals.averageReview=
               reviews.reduce((t,x)=>t+x.points,0)/reviews.length
           res.locals.answers = await Answer.find({problemId:probId,studentId:res.locals.user._id})
-          console.log('res.locals=')
-          console.log(JSON.stringify(res.locals,null,5))
+
           res.render("showProblem")
         } catch (e) {
               console.log("Error in showProblem: "+e)
@@ -450,7 +450,8 @@ app.get('/editProblem/:probId',
     const id = req.params.probId
     res.locals.probId = id
     res.locals.problem = await Problem.findOne({_id:id})
-    res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
+    res.locals.course =
+        await Course.findOne({_id:res.locals.problem.courseId},'ownerId')
     res.render("editProblem")
   }
 )
@@ -525,31 +526,56 @@ app.get('/reviewAnswers/:probId',
           const probId = req.params.probId
           // first find the problem and course for this problemId
           res.locals.problem = await Problem.findOne({_id:probId})
-          res.locals.course = await Course.findOne({_id:res.locals.problem.courseId})
-          res.locals.course.gradeSheet = {}
+
 
           // next, get the answers for this problem that I have reviewed
           const myReviews = await Review.find({reviewerId:req.user._id,problemId:probId})
-          const myReviewedAnswerIds = myReviews.map((x)=>x.answerId)
+          const myReviewedAnswerIds =
+              myReviews.map((x)=>x.answerId)
           res.locals.numReviewsByMe = myReviews.length
           // find all answers I haven't reviewed, sorted by number of reviews
+          console.log("reviewAnswer")
+          console.dir(myReviewedAnswerIds)
+          myReviews.forEach(x => {console.log(x)})
+          console.log(`probId=${probId}`)
 
+          console.log("*********")
+          const reviewedAnswersToProblem =
+             await Review
+                    .find({problemId:res.locals.problem._id})
+                    .distinct('answerId')
+          reviewedAnswersToProblem.forEach(x=>console.log(x))
+          console.log("*********")
 
-          const answersToReview =
-             await Review.aggregate(
-               [{$match:{problemId:res.locals.problem._id,
-                         answerId:{$nin:myReviewedAnswerIds}}},
-                {$sortByCount:"$answerId"}])
+          const unreviewedAnswers =
+              await Answer.find({problemId:res.locals.problem._id,
+                                 _id:{$nin:reviewedAnswersToProblem}})
+          console.log(unreviewedAnswers)
+          unreviewedAnswers.forEach(x=>{console.log(x)})
 
-
-
-          if (answersToReview.length==0) {
-            res.locals.answer = false
+          if (unreviewedAnswers.length > 0){
+              const randPos =
+                 Math.floor(Math.random() * unreviewedAnswers.length)
+              res.locals.answer = unreviewedAnswers[randPos]
+              res.locals.answerId = res.locals.answer._id
           } else {
-            // even better would be to find all answers with the minimum
-            // number of reviews and randomly select one
-            res.locals.answerId = answersToReview[answersToReview.length-1]
-            res.locals.answer = await Answer.findOne({_id:res.locals.answerId})
+              const answersToReview =
+                 await Review.aggregate(
+                   [{$match:{problemId:res.locals.problem._id,
+                             answerId:{$nin:myReviewedAnswerIds}}},
+                    {$sortByCount:"$answerId"}])
+
+              console.dir(answersToReview)
+
+
+              if (answersToReview.length==0) {
+                res.locals.answer = false
+              } else {
+                // even better would be to find all answers with the minimum
+                // number of reviews and randomly select one
+                res.locals.answerId = answersToReview[answersToReview.length-1]
+                res.locals.answer = await Answer.findOne({_id:res.locals.answerId})
+              }
           }
 
           res.render("reviewAnswer")
@@ -646,7 +672,7 @@ app.get('/showTheStudentInfo/:option/:courseId',
         const id = req.params.courseId
         // get the courseInfo
         res.locals.courseInfo =
-            await Course.findOne({_id:id})
+            await Course.findOne({_id:id},'name')
 
         // get the list of ids of students in the course
         const memberList =
@@ -702,7 +728,7 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
   async (req, res, next) => {
     try {
       res.locals.courseInfo =
-          await Course.findOne({_id:req.params.courseId})
+          await Course.findOne({_id:req.params.courseId},'name gradeSheet')
       res.locals.studentInfo =
           await User.findOne({_id:req.params.studentId})
       res.render("showOneStudentInfo")
