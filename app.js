@@ -546,7 +546,7 @@ async (req,res,next) => {
       tempAnswer.pendingReviewers =
           tempAnswer.pendingReviewers.filter((r)=>{
             if (r.equals(x.reviewerId)) {
-              tempAnswer.newReviews -= 1
+              tempAnswer.numReviews -= 1
               return false
             } else {
               return true
