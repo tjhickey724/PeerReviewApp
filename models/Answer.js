@@ -9,6 +9,9 @@ var answerSchema = Schema( {
   psetId: ObjectId,
   problemId: ObjectId,
   answer: String,
+  reviewers: [Schema.Types.ObjectId],
+  numReviews: Number,
+  pendingReviewers: [Schema.Types.ObjectId],
   createdAt: Date,
 } );
 

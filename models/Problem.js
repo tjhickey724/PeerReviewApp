@@ -10,7 +10,15 @@ var problemSchema = Schema( {
   problemText: String,
   points: Number,
   rubric: String,
+  pendingReviews: mongoose.Schema.Types.Mixed,
   createdAt: Date,
 } );
+/*
+  pendingReviews is a list of JSON objects of the form:
+   {answerId,reviewerId,timeSent}
+  before saving changes we need to run the command:
+    problem.markModified(pendingReviews)
+  or Mongoose won't update the change...
+*/
 
 module.exports = mongoose.model( 'Problem', problemSchema );

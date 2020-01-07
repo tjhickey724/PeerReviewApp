@@ -11,7 +11,13 @@ var reviewSchema = Schema( {
   answerId: ObjectId,
   review: String,
   points: Number,
+  upvoters: [Schema.Types.ObjectId],
+  downvoters: [Schema.Types.ObjectId],
   createdAt: Date,
 } );
+/*
+upvoters and downvoters are the lists of users who
+upvoted or downvoted that review.
+*/
 
 module.exports = mongoose.model( 'Review', reviewSchema );

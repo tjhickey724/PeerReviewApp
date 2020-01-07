@@ -26,22 +26,14 @@ flash = require('connect-flash')
 
 const mongoose = require( 'mongoose' );
 
-mongoose.connect( 'mongodb://localhost/pra', { useNewUrlParser: true } );
+mongoose.connect( 'mongodb://localhost/pra_V2_0', { useNewUrlParser: true } );
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log("we are connected!!!")
 });
 
-console.log("removed the controllers!")
-/*
-const dbController = require('./controllers/dbController')
-const courseController = require('./controllers/courseController')
-const problemSetController = require('./controllers/problemSetController')
-const problemController = require('./controllers/problemController')
-const answerController = require('./controllers/answerController')
-const reviewController = require('./controllers/reviewController')
-*/
+
 // Authentication
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 // here we set up authentication with passport
@@ -358,6 +350,7 @@ app.post('/saveProblem/:psetId',
             problemText: req.body.problemText,
             points: req.body.points,
             rubric: req.body.rubric,
+            pendingReviews: [],
             createdAt: new Date()
            }
           )
@@ -469,6 +462,9 @@ app.post('/saveAnswer/:probId',
           psetId:problem.psetId,
           problemId:problem._id,
           answer:req.body.answer,
+          reviewers: [],
+          numReviews: 0,
+          pendingReviewers: [],
           createdAt: new Date()
          }
         )
@@ -515,8 +511,115 @@ app.get('/reviewAnswers1/:probId',
 )
 
 
-
 app.get('/reviewAnswers/:probId',
+async (req,res,next) => {
+  try{
+    console.log("reviewAnswers-A")
+    const probId = req.params.probId
+    let problem = await Problem.findOne({_id:probId})
+
+    //first we remove all pendingReviews that have exceeded
+    // the time limit of 60 secs = 60,000 ms
+    // 60 is a magic number and should be moved up somewhere...
+    const tooOld = (new Date).getTime() - 60*1000;
+    let expiredReviews = []
+    let pendingReviews =
+        problem.pendingReviews.filter((x)=>{
+          console.log(`${x.timeSent}<?${tooOld}`)
+          if (x.timeSent<tooOld) {
+            expiredReviews.push(x)
+            console.log('removed expired review')
+            return false
+          }
+        })
+    problem.pendingReviews = pendingReviews
+    problem.markModified('pendingReviews')
+    await problem.save()
+
+
+    console.log("reviewAnswers-B")
+    expiredReviews.forEach(async function(x){
+      // remove the reviewerId from the list of pendingReviewers
+      // and decrement the optimistic numReview field
+      // pendingReviews has form x = {answerId,reviewerId,timeSent}
+      let tempAnswer = await Answer.findOne({_id:x.answerId})
+      tempAnswer.pendingReviewers =
+          tempAnswer.pendingReviewers.filter((r)=>{
+            if (r.equals(x.reviewerId)) {
+              tempAnswer.newReviews -= 1
+              return false
+            } else {
+              return true
+            }
+          }
+        )
+      //tempAnswer.markModified('pendingReviewers')
+      await tempAnswer.save()
+
+    })
+
+    console.log("reviewAnswers-C")
+    // next, we find all answers to this Problem, sorted by numReviews
+    let answers =
+        await Answer.find({problemId:probId})
+                    .sort({numReviews:'asc'})
+
+    // find first answer not already reviewed or being reviewed by user
+    let i=0
+    let answer = null
+    while (i<answers.length){
+      answer = answers[i]
+      if (!answer.reviewers.find((x)=>(x.equals(req.user._id)))
+          &&
+          !answer.pendingReviewers.find((x)=>(x.equals(req.user._id)))
+        ){
+          console.log("reviewAnswers-D1")
+          // we found an answer the user hasn't reviewed!
+          answer.numReviews += 1 // we optimistically add 1 to numReviews
+          answer.pendingReviewers.push(req.user._id)
+          console.log("reviewAnswers-D1a")
+          await answer.save()
+          console.log("reviewAnswers-D1b")
+          // {answerId,reviewerId,timeSent}
+          problem.pendingReviews.push(
+            {answerId:answer._id,
+             reviewerId:req.user._id,
+             timeSent:(new Date()).getTime()})
+
+          problem.markModified('pendingReviews')
+          console.log("reviewAnswers-D2")
+          await problem.save()
+          break
+        }
+      else {
+        answer=null
+      }
+      i++
+    }
+
+
+    console.log("reviewAnswers-E")
+    // and we need to add it to the problem.pendingReviews
+    res.locals.answer = answer
+    res.locals.problem = problem
+    res.locals.numReviewsByMe =
+        await Review.find({problemId:problem._id,
+                           reviewerId:req.user._id}).length
+
+    console.log("reviewAnswers-F")
+    res.render("reviewAnswer")
+  }
+  catch(e){
+    next(e)
+  }
+ }
+)
+/*
+  This one works, sort of, but it will be slow with a large class.
+  and it doesn't take account of reviews sent but not received..
+
+*/
+app.get('/reviewAnswers0/:probId',
     async (req,res,next) => {
       try{
           // this selects the problem with the fewest reviews
@@ -587,11 +690,22 @@ app.get('/reviewAnswers/:probId',
   )
 
 
+  /*  saveReview
+    when we save a review we need to create a new review document
+    but also update the corresponding answer and problem documents
+    to store the new information about number of reviews and pending reviews
+    This is used when we generate an answer for a user to review
+  */
 app.post('/saveReview/:probId/:answerId',
+
   async ( req, res, next ) => {
     try {
+      console.log('saveReview-A')
       const problem =
           await Problem.findOne({_id:req.params.probId})
+
+      const answer =
+          await Answer.findOne({_id:req.params.answerId})
 
       const newReview = new Review(
        {
@@ -602,12 +716,59 @@ app.post('/saveReview/:probId/:answerId',
         answerId:req.params.answerId,
         review:req.body.review,
         points:req.body.points,
+        upvoters: [],
+        downvoters: [],
         createdAt: new Date()
        }
       )
-
+      console.log('saveReview-A2')
       await newReview.save()
+      console.log('saveReview-B')
+      // next we update the reviewers info in the answer object
+      answer.reviewers.push(req.user._id)
+      answer.numReviews += 1
 
+      let pendingReviewers = []
+      console.log(`userID=${req.user._id}`)
+      for (let i=0; i<answer.pendingReviewers.length; i++){
+        const reviewer = answer.pendingReviewers[i]
+        console.log(`${i} -- ${reviewer}`)
+        if (reviewer.equals(req.user._id)){
+          answer.numReviews -= 1
+          console.log(`removed ${reviewer} from answer.pendingReviewers`)
+          // because we incremented it when we sent the review to user
+        } else {
+          pendingReviewers.push(reviewer)
+        }
+      }
+      answer.pendingReviewers = pendingReviewers
+      answer.markModified('pendingReviewers')
+      console.log('saveReview-B2')
+      await answer.save()
+      console.log('saveReview-C')
+      // finally we update the pendingReviews field of the problem
+      // to remove this reviewer, if necessary
+      let pendingReviews=[]
+      for (let i=0; i<problem.pendingReviews.length; i++){
+        reviewInfo = problem.pendingReviews[i]
+        console.log(`${i} -- ${reviewInfo.reviewerId}`)
+        console.dir(reviewInfo.reviewerId)
+        if (reviewInfo.reviewerId.equals(req.user._id)){
+          console.log(`removed ${req.user._id} from problem ${problem._id}`)
+        } else {
+          pendingReviews.push(reviewInfo)
+        }
+      }
+      console.log('saveReview-C2')
+      problem.pendingReviews = pendingReviews
+      console.log('saveReview-C3')
+      problem.markModified('pendingReviews')
+      console.log('saveReview-C4')
+      //console.dir(problem)
+      await problem.save()
+      console.log('saveReview-D')
+
+      // we can now redirect them to review more answers
       res.redirect('/reviewAnswers/'+req.params.probId)
     }
     catch(e){
