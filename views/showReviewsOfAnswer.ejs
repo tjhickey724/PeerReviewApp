@@ -1,5 +1,9 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
+
+<script type="text/javascript" src="/js/clickThumb.js"></script>
+
+
     <h1>Problem</h1>
     <h3><%= problem.description %></h3>
     <b>The Question</b>
@@ -14,28 +18,28 @@
     <h2>All Reviews of this Answer</h2>
     <ul>
     <% for(i = 0; i<= reviews.length-1; i++){  %>
-        <li>
-            <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
-            <img src="/icons/heart.svg" alt="" width="32" height="32" title="Bootstrap">
+        <li><i class="far fa-thumbs-up"
+               id='<%= "review"+i %>'
+               onclick="clickThumb(<%= i %>)"></i>
+               0 likes for
+            <a href="/showReview/<%= reviews[i]._id %>">
+                review <%= i %>:
+            </a>
             <%= reviews[i].points %> points
             <% if (reviews[i].reviewerId.equals(user._id)){%>
                 <b>Your Review!</b>
             <% } %>
             <br>
-            <div style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:1px">
-                <a href="/showReview/<%= reviews[i]._id %>">
-                    <%= reviews[i].review %>
-                </a>
-            </div>
-
-
-            <hr>
+            <div style="border:2px solid blue; white-space: pre-wrap; font-family:monospace; padding:1px"
+            ><%= reviews[i].review %></div>
+            <br>
         </li>
     <% } %>
     </ul>
     <hr>
     <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
     <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
+
 
 
 
