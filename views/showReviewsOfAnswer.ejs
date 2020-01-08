@@ -14,7 +14,10 @@
     <h2>All Reviews of this Answer</h2>
     <ul>
     <% for(i = 0; i<= reviews.length-1; i++){  %>
-        <li> <%= reviews[i].points %> points
+        <li>
+            <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+            <img src="/icons/heart.svg" alt="" width="32" height="32" title="Bootstrap">
+            <%= reviews[i].points %> points
             <% if (reviews[i].reviewerId.equals(user._id)){%>
                 <b>Your Review!</b>
             <% } %>
