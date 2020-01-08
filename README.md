@@ -4,6 +4,8 @@ This webapp is designed to allow instructors to create questions with hidden gra
 
 The hope is that by reviewing other students' work, they will develop deeper understandings of the problem and its possible solutions.
 
+The instructor and student can view metrics relating to their performance (e.g. number of problems answered, number of reviews written, average review score on each problem)
+
 ## Installation
 To run this app locally you need to 
 * clone a copy (or download it)
