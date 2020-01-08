@@ -14,6 +14,9 @@ const Review = require('./models/Review')
 const User = require('./models/User')
 const CourseMember = require('./models/CourseMember')
 
+//const mongoose = require( 'mongoose' );
+//const ObjectId = mongoose.Schema.Types.ObjectId;
+
 
 
 //var apikey = require('./config/apikey');
@@ -689,6 +692,30 @@ app.get('/showReviewsOfAnswer/:answerId',
       }
     }
 )
+
+app.get('/thumbsUp/:reviewId/:userId',
+  async (req,res,next) => {
+    let reviewId = req.params.reviewId
+    let userId = req.params.userId
+    console.log(`reviewId=${reviewId}`)
+    console.log(`userId=${userId}`)
+    await Review.findOneAndUpdate(
+       {_id: reviewId},
+       {$push:{upvoters:userId}})
+  res.json({result:"OK"})
+  })
+
+app.get('/thumbsDown/:reviewId/:userId',
+  async (req,res,next) => {
+    let reviewId = req.params.reviewId
+    let userId = req.params.userId
+    console.log(`reviewId=${reviewId}`)
+    console.log(`userId=${userId}`)
+    await Review.findOneAndUpdate(
+       {_id: reviewId},
+       {$pull:{upvoters: userId}})
+  res.json({result:"OK"})
+  })
 
 
 app.get('/showReviewsByUser/:probId',

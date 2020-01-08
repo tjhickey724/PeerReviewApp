@@ -17,11 +17,21 @@
 
     <h2>All Reviews of this Answer</h2>
     <ul>
-    <% for(i = 0; i<= reviews.length-1; i++){  %>
-        <li><i class="far fa-thumbs-up"
-               id='<%= "review"+i %>'
-               onclick="clickThumb(<%= i %>)"></i>
-               0 likes for
+    <% for(i = 0; i<= reviews.length-1; i++){
+        console.log("in reviews i= "+i)
+        console.log(reviews[i].upvoters)
+        console.log(user._id)
+        let numLikes = reviews[i].upvoters.length
+        let userLikes = reviews[i].upvoters.includes(user._id)
+        let fa_prefix = userLikes?"fas":"far"
+        %>
+        <li><i  class="<%= fa_prefix %> fa-thumbs-up"
+                id='<%= "review"+i %>'
+                onclick="clickThumb(<%= i %>,'<%= reviews[i]._id %>','<%= user._id %>')"></i>
+            <span id = '<%= "likes"+i %>'>
+                <%= numLikes %>
+            </span>
+            likes for
             <a href="/showReview/<%= reviews[i]._id %>">
                 review <%= i %>:
             </a>
