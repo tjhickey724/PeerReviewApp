@@ -1,22 +1,39 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
-    <h1>Answer</h1>
+    <h1>Problem</h1>
+    <h3><%= problem.description %></h3>
+    <b>The Question</b>
+    <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
+
+    <b>Their Answer</b>
     <small>Submission time and date:<%= answer.createdAt %> </small>
-    <pre class="bg-success      "><%= answer.answer %></pre>
+    <pre class="bg-default" style="border:thick solid red"><%= answer.answer %></pre>
     <br>
 
-    <h1>Reviews</h1>
+
+    <h2>All Reviews of this Answer</h2>
     <ul>
     <% for(i = 0; i<= reviews.length-1; i++){  %>
-        <li> <%= reviews[i].points %> points<br>
-            <a href="/showReview/<%= reviews[i]._id %>">
-                <%= reviews[i].review %>
-            </a>
+        <li> <%= reviews[i].points %> points
+            <% if (reviews[i].reviewerId.equals(user._id)){%>
+                <b>Your Review!</b>
+            <% } %>
+            <br>
+            <div style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:1px">
+                <a href="/showReview/<%= reviews[i]._id %>">
+                    <%= reviews[i].review %>
+                </a>
+            </div>
+
+
             <hr>
         </li>
     <% } %>
     </ul>
     <hr>
+    <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
+    <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
+
 
 
 <%- include('bootfooter') -%>

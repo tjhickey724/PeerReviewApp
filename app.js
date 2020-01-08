@@ -480,36 +480,6 @@ app.post('/saveAnswer/:probId',
   }
 )
 
-app.get('/reviewAnswers1/:probId',
-      async ( req, res, next ) => {
-        const id = req.params.probId
-        res.locals.problem = await Problem.findOne({_id:id})
-
-        // use mongoose selection feature to only pull selected fields
-        let reviews = await Review.find({reviewerId:req.user._id,problemId:id})
-        res.locals.reviewedAnswers = reviews.map((r)=>r.answerId)
-
-        let answers = Answer.find({problemId:id,
-               _id:{$not:{$in:res.locals.allReviewedAnswers},
-                    $not:{$in:res.locals.reviewedAnswers}   }
-                  })
-            .exec()
-        res.locals.answers = answers.map((x)=>x.answer)
-
-        if (answers.length==0){
-          res.locals.answered = false
-          res.locals.answer={}
-        } else {
-          const randPos =
-             Math.floor(Math.random() * answers.length)
-          res.locals.answered = true
-          res.locals.answer = answers[randPos]
-        }
-
-        res.render("reviewAnswer")
-      }
-)
-
 
 app.get('/reviewAnswers/:probId',
 async (req,res,next) => {
@@ -614,81 +584,6 @@ async (req,res,next) => {
   }
  }
 )
-/*
-  This one works, sort of, but it will be slow with a large class.
-  and it doesn't take account of reviews sent but not received..
-
-*/
-app.get('/reviewAnswers0/:probId',
-    async (req,res,next) => {
-      try{
-          // this selects the problem with the fewest reviews
-          // which hasn't been reviewed by this user.
-          // First though it finds answers that haven't been reviewed at all...
-          // If the user has reviewed all of the answers, it returns ...
-          const probId = req.params.probId
-          // first find the problem and course for this problemId
-          res.locals.problem = await Problem.findOne({_id:probId})
-
-
-          // next, get the answers for this problem that I have reviewed
-          const myReviews = await Review.find({reviewerId:req.user._id,problemId:probId})
-          const myReviewedAnswerIds =
-              myReviews.map((x)=>x.answerId)
-          res.locals.numReviewsByMe = myReviews.length
-          // find all answers I haven't reviewed, sorted by number of reviews
-          console.log("reviewAnswer")
-          console.dir(myReviewedAnswerIds)
-          myReviews.forEach(x => {console.log(x)})
-          console.log(`probId=${probId}`)
-
-          console.log("*********")
-          const reviewedAnswersToProblem =
-             await Review
-                    .find({problemId:res.locals.problem._id})
-                    .distinct('answerId')
-          reviewedAnswersToProblem.forEach(x=>console.log(x))
-          console.log("*********")
-
-          const unreviewedAnswers =
-              await Answer.find({problemId:res.locals.problem._id,
-                                 _id:{$nin:reviewedAnswersToProblem}})
-          console.log(unreviewedAnswers)
-          unreviewedAnswers.forEach(x=>{console.log(x)})
-
-          if (unreviewedAnswers.length > 0){
-              const randPos =
-                 Math.floor(Math.random() * unreviewedAnswers.length)
-              res.locals.answer = unreviewedAnswers[randPos]
-              res.locals.answerId = res.locals.answer._id
-          } else {
-              const answersToReview =
-                 await Review.aggregate(
-                   [{$match:{problemId:res.locals.problem._id,
-                             answerId:{$nin:myReviewedAnswerIds}}},
-                    {$sortByCount:"$answerId"}])
-
-              console.dir(answersToReview)
-
-
-              if (answersToReview.length==0) {
-                res.locals.answer = false
-              } else {
-                // even better would be to find all answers with the minimum
-                // number of reviews and randomly select one
-                res.locals.answerId = answersToReview[answersToReview.length-1]
-                res.locals.answer = await Answer.findOne({_id:res.locals.answerId})
-              }
-          }
-
-          res.render("reviewAnswer")
-      }catch(error){
-          console.log("error in getAnswerToReview: "+error)
-          res.send("error in getAnswerToReview: "+error)
-      }
-    }
-  )
-
 
   /*  saveReview
     when we save a review we need to create a new review document
@@ -767,9 +662,9 @@ app.post('/saveReview/:probId/:answerId',
       //console.dir(problem)
       await problem.save()
       console.log('saveReview-D')
-
+      res.redirect('/showReviewsOfAnswer/'+answer._id)
       // we can now redirect them to review more answers
-      res.redirect('/reviewAnswers/'+req.params.probId)
+      // res.redirect('/reviewAnswers/'+req.params.probId)
     }
     catch(e){
       next(e)
@@ -782,7 +677,11 @@ app.get('/showReviewsOfAnswer/:answerId',
     try {
       const id = req.params.answerId
       res.locals.answer = await Answer.findOne({_id:id})
-      res.locals.reviews = await Review.find({answerId:id})
+      res.locals.problem = await Problem.findOne({_id:res.locals.answer.problemId})
+      res.locals.reviews =
+          await Review.find({answerId:id})
+                      .sort({points:'asc',review:'asc'})
+
       res.render("showReviewsOfAnswer")
       }
     catch(e){
