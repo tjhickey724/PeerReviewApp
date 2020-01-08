@@ -15,10 +15,11 @@
                  )
                  let answer = answers[0]
               %>
+
               <pre class="bg-info"><%= answer.answer %></pre>
             your review: <%= usersReviews[i].points %>/<%= problem.points %>pts
-            <a href="/showReview/<%= usersReviews[i]._id %>">
-                (edit)
+            <a href="/showReviewsOfAnswer/<%= answer._id %>">
+                all Reviews of answer <%= i %>
             </a>
             <pre style="border:thick solid green"
                  class="bg-warning"><%= usersReviews[i].review %></pre>
