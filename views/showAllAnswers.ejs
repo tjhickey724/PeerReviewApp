@@ -1,6 +1,8 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
 
+    <script type="text/javascript" src="/js/clickThumb.js"></script>
+
     <h3><%= problem.description %></h3>
     <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
     <hr>
@@ -19,14 +21,25 @@
         <% for (let j=0; j<reviews.length; j++){ %>
           <% console.log(answers[i]._id+" j="+j+ " "+reviews[j].answerId) %>
           <% if (reviews[j].answerId.equals(answers[i]._id)) {
-             let rev=reviews[j] %>
+             let rev=reviews[j]
+             let numLikes = reviews[j].upvoters.length
+             let userLikes = reviews[j].upvoters.includes(user._id)
+             let fa_prefix = userLikes?"fas":"far"
+             %>
 
             <div class="row">
               <div class="col-md-1">
               </div>
                <div class="col">
+                 <i  class="<%= fa_prefix %> fa-thumbs-up"
+                             id='<%= "review"+j %>'
+                             onclick="clickThumb(<%= j %>,'<%= reviews[j]._id %>','<%= user._id %>')"></i>
+
                         <i>
-                          likes: <%= rev.upvoters.length %>
+
+                          likes: <span id='<%="likes"+ j %>'>
+                                   <%= rev.upvoters.length %>
+                                 </span>
                              .... grade:
                            <%= rev.points %>/<%= problem.points %>pts
                          </i>
@@ -53,6 +66,7 @@
     <hr>
             <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
             <a href="/showReviewsByUser/<%= problem._id %>" class="btn btn-small btn-info">Your Reviews of other's answers</a>
+            <a href="/showProblem/<%= problem._id %>" class="btn btn-small btn-danger">Back to the Problem</a>
             <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
 
 

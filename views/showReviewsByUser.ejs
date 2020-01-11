@@ -1,5 +1,8 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
+
+<script type="text/javascript" src="/js/clickThumb.js"></script>
+
     <h2>The Problem you reviewed</h2>
     <small>Submission time and date:<%= problem.createdAt %> </small>
     <pre class="bg-success      "><%= problem.problemText %></pre>
@@ -15,19 +18,33 @@
                  )
                  let answer = answers[0]
               %>
-              <pre class="bg-default"
+              <pre class="bg-warning"
                    style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
                ><%= answer.answer %></pre>
                Reviews:<br>
             <ul>
                 <% for(let j=0; j< allReviews.length; j++){
                       let rev = allReviews[j]
+
+                      let numLikes = allReviews[j].upvoters.length
+                      let userLikes = allReviews[j].upvoters.includes(user._id)
+                      let fa_prefix = userLikes?"fas":"far"
                       if (!rev.answerId.equals(answer._id)){
                           continue
                       }
                     %>
                 <li>
-                    likes: <%= rev.upvoters.length %>
+                    <i  class="<%= fa_prefix %> fa-thumbs-up"
+                        id='<%= "review"+j %>'
+                        onclick="clickThumb(<%= j %>,'<%= allReviews[j]._id %>','<%= user._id %>')">
+                    </i>
+
+          <i>
+                    likes:
+                    <span id='<%="likes"+ j %>'>
+                        <%= rev.upvoters.length %>
+                    </span>
+
                       .... grade:
                     <%= rev.points %>/<%= problem.points %>pts
                     <% if (rev.reviewerId.equals(user._id)) {%>

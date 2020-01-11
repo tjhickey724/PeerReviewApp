@@ -146,7 +146,7 @@ function isLoggedIn(req, res, next) {
 
 app.get('/',
     async ( req, res, next ) => {
-      console.log("in new app.get(/)")
+
 
       if (!req.user) next()
 
@@ -207,7 +207,7 @@ async function getCoursePin(){
   // but that won't be an issue with this alpha version!
   let coursePin =  Math.floor(Math.random()*10000000)
   let lookupPin = await Course.find({coursePin:coursePin},'coursePin')
-  console.log("picking coursePin="+coursePin+" duplicates? "+lookupPin.length)
+
   while (lookupPin.length>0) {
     coursePin =  Math.floor(Math.random()*10000000)
     lookupPin = await Course.find({coursePin:coursePin},'coursePin')
@@ -243,7 +243,7 @@ app.post('/joinCourse',
   async (req, res, next ) => {
     try {
       let coursePin = req.body.coursePin
-      console.log(`coursePin=${coursePin}`)
+
 
       res.locals.courseInfo =
           await Course.findOne({coursePin:coursePin},'name coursePin ownerId')
@@ -302,15 +302,15 @@ app.post('/saveProblemSet/:courseId',
           createdAt: new Date()
          }
       )
-      console.log(JSON.stringify(newProblemSet))
+
       await newProblemSet.save()
 
       res.locals.courseInfo =
           await Course.findOne({_id:id},'name coursePin ownerId')
-      console.log("got course info")
+
       res.locals.problemSets =
         await ProblemSet.find({courseId:res.locals.courseInfo._id})
-      console.log("got problemsets")
+
       res.render("showCourse")
     }
     catch(e){
@@ -487,7 +487,7 @@ app.post('/saveAnswer/:probId',
 app.get('/reviewAnswers/:probId',
 async (req,res,next) => {
   try{
-    console.log("reviewAnswers-A")
+
     const probId = req.params.probId
     let problem = await Problem.findOne({_id:probId})
 
@@ -498,10 +498,10 @@ async (req,res,next) => {
     let expiredReviews = []
     let pendingReviews =
         problem.pendingReviews.filter((x)=>{
-          console.log(`${x.timeSent}<?${tooOld}`)
+
           if (x.timeSent<tooOld) {
             expiredReviews.push(x)
-            console.log('removed expired review')
+
             return false
           }
         })
@@ -510,7 +510,7 @@ async (req,res,next) => {
     await problem.save()
 
 
-    console.log("reviewAnswers-B")
+
     expiredReviews.forEach(async function(x){
       // remove the reviewerId from the list of pendingReviewers
       // and decrement the optimistic numReview field
@@ -531,7 +531,7 @@ async (req,res,next) => {
 
     })
 
-    console.log("reviewAnswers-C")
+
     // next, we find all answers to this Problem, sorted by numReviews
     let answers =
         await Answer.find({problemId:probId})
@@ -546,13 +546,13 @@ async (req,res,next) => {
           &&
           !answer.pendingReviewers.find((x)=>(x.equals(req.user._id)))
         ){
-          console.log("reviewAnswers-D1")
+
           // we found an answer the user hasn't reviewed!
           answer.numReviews += 1 // we optimistically add 1 to numReviews
           answer.pendingReviewers.push(req.user._id)
-          console.log("reviewAnswers-D1a")
+
           await answer.save()
-          console.log("reviewAnswers-D1b")
+
           // {answerId,reviewerId,timeSent}
           problem.pendingReviews.push(
             {answerId:answer._id,
@@ -560,7 +560,7 @@ async (req,res,next) => {
              timeSent:(new Date()).getTime()})
 
           problem.markModified('pendingReviews')
-          console.log("reviewAnswers-D2")
+
           await problem.save()
           break
         }
@@ -571,7 +571,7 @@ async (req,res,next) => {
     }
 
 
-    console.log("reviewAnswers-E")
+
     // and we need to add it to the problem.pendingReviews
     res.locals.answer = answer
     res.locals.problem = problem
@@ -579,7 +579,7 @@ async (req,res,next) => {
         await Review.find({problemId:problem._id,
                            reviewerId:req.user._id}).length
 
-    console.log("reviewAnswers-F")
+
     res.render("reviewAnswer")
   }
   catch(e){
@@ -598,7 +598,7 @@ app.post('/saveReview/:probId/:answerId',
 
   async ( req, res, next ) => {
     try {
-      console.log('saveReview-A')
+
       const problem =
           await Problem.findOne({_id:req.params.probId})
 
@@ -619,21 +619,21 @@ app.post('/saveReview/:probId/:answerId',
         createdAt: new Date()
        }
       )
-      console.log('saveReview-A2')
+
       await newReview.save()
-      console.log('saveReview-B')
+
       // next we update the reviewers info in the answer object
       answer.reviewers.push(req.user._id)
       answer.numReviews += 1
 
       let pendingReviewers = []
-      console.log(`userID=${req.user._id}`)
+
       for (let i=0; i<answer.pendingReviewers.length; i++){
         const reviewer = answer.pendingReviewers[i]
-        console.log(`${i} -- ${reviewer}`)
+
         if (reviewer.equals(req.user._id)){
           answer.numReviews -= 1
-          console.log(`removed ${reviewer} from answer.pendingReviewers`)
+
           // because we incremented it when we sent the review to user
         } else {
           pendingReviewers.push(reviewer)
@@ -641,30 +641,29 @@ app.post('/saveReview/:probId/:answerId',
       }
       answer.pendingReviewers = pendingReviewers
       answer.markModified('pendingReviewers')
-      console.log('saveReview-B2')
+
       await answer.save()
-      console.log('saveReview-C')
+
       // finally we update the pendingReviews field of the problem
       // to remove this reviewer, if necessary
       let pendingReviews=[]
       for (let i=0; i<problem.pendingReviews.length; i++){
         reviewInfo = problem.pendingReviews[i]
-        console.log(`${i} -- ${reviewInfo.reviewerId}`)
-        console.dir(reviewInfo.reviewerId)
+
         if (reviewInfo.reviewerId.equals(req.user._id)){
-          console.log(`removed ${req.user._id} from problem ${problem._id}`)
+          // don't push review back into pendingReviews
         } else {
           pendingReviews.push(reviewInfo)
         }
       }
-      console.log('saveReview-C2')
+
       problem.pendingReviews = pendingReviews
-      console.log('saveReview-C3')
+
       problem.markModified('pendingReviews')
-      console.log('saveReview-C4')
-      //console.dir(problem)
+
+
       await problem.save()
-      console.log('saveReview-D')
+
       res.redirect('/showReviewsOfAnswer/'+answer._id)
       // we can now redirect them to review more answers
       // res.redirect('/reviewAnswers/'+req.params.probId)
@@ -697,8 +696,7 @@ app.get('/thumbsUp/:reviewId/:userId',
   async (req,res,next) => {
     let reviewId = req.params.reviewId
     let userId = req.params.userId
-    console.log(`reviewId=${reviewId}`)
-    console.log(`userId=${userId}`)
+
     await Review.findOneAndUpdate(
        {_id: reviewId},
        {$push:{upvoters:userId}})
@@ -709,8 +707,7 @@ app.get('/thumbsDown/:reviewId/:userId',
   async (req,res,next) => {
     let reviewId = req.params.reviewId
     let userId = req.params.userId
-    console.log(`reviewId=${reviewId}`)
-    console.log(`userId=${userId}`)
+
     await Review.findOneAndUpdate(
        {_id: reviewId},
        {$pull:{upvoters: userId}})
@@ -789,8 +786,7 @@ app.get('/showTheStudentInfo/:option/:courseId',
              res.locals.problems,
              res.locals.answers,
              res.locals.reviews)
-        //console.log("creating Gradesheet")
-        //console.dir(gradeSheet)
+
 
         res.locals.gradeSheet = gradeSheet
 
@@ -799,7 +795,6 @@ app.get('/showTheStudentInfo/:option/:courseId',
                 {$set:{gradeSheet:gradeSheet,gradesUpdateTime:new Date()}},
                 {new:true})
 
-        console.log(`option = ${req.params.option}`)
 
         if (req.params.option == 'all'){
           res.render("showAllStudentInfo")
