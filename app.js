@@ -727,6 +727,10 @@ app.get('/showReviewsByUser/:probId',
                             {reviewerId:req.user._id,
                              problemId:res.locals.problem._id}
                            )
+       res.locals.allReviews =
+           await Review.find(
+                             {problemId:res.locals.problem._id}
+                            )
       const answerIds = res.locals.usersReviews.map((r)=>r.answerId)
       res.locals.usersReviewedAnswers = await Answer.find(
          {_id:{$in:answerIds}}

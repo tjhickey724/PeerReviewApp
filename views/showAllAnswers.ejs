@@ -11,25 +11,35 @@
           <div class="col-md-12">
             <%= answers[i].createdAt %>
             <pre class="bg-warning"
-                 style="border-top:thick solid blue; margin:10px"
-             ><%= answers[i].answer %></pre>
+                        style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
+                    ><%= answers[i].answer %></pre>
           </div>
         </div>
 
         <% for (let j=0; j<reviews.length; j++){ %>
           <% console.log(answers[i]._id+" j="+j+ " "+reviews[j].answerId) %>
-          <% if (reviews[j].answerId.equals(answers[i]._id)) {%>
-            <hr>
+          <% if (reviews[j].answerId.equals(answers[i]._id)) {
+             let rev=reviews[j] %>
+
             <div class="row">
               <div class="col-md-1">
               </div>
                <div class="col">
-                  points: <%= reviews[j].points %>/<%= problem.points %>
-                  <%= reviews[j].createdAt %>
-                <br>
-                <pre
-                     style="border-top:thick solid blue; margin:10px"
-                 ><%= reviews[j].review %></pre>
+                        <i>
+                          likes: <%= rev.upvoters.length %>
+                             .... grade:
+                           <%= rev.points %>/<%= problem.points %>pts
+                         </i>
+                           <% if (rev.reviewerId.equals(user._id)) {%>
+                               <span style="color:rgb(220,120,255);">YOUR REVIEW!!</span>
+                               <div style="background:rgb(220,120,255);
+                           <% } else { %>
+                               <div style="background:rgb(120,220,255);
+                           <% } %>
+                                   padding:5px; margin-bottom:10px;border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
+                                   ><%= rev.review
+                           %></div>
+
               </div>
             </div>
               <% }%>

@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var problemSchema = Schema( {
-  courseId: ObjectId,
-  psetId: ObjectId,
+  courseId: {type:ObjectId,index:true},
+  psetId: {type:ObjectId,index:true},
   description: String,
   problemText: String,
   points: Number,

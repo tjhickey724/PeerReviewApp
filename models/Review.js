@@ -4,11 +4,11 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var reviewSchema = Schema( {
-  reviewerId: ObjectId,
-  courseId: ObjectId,
+  reviewerId: {type:ObjectId,index:true}, // also track problemId!
+  courseId: {type:ObjectId,index:true},
   psetId: ObjectId,
-  problemId: ObjectId,
-  answerId: ObjectId,
+  problemId: {type:ObjectId,index:true}, // should also track reviwerId!
+  answerId: {type:ObjectId,index:true},
   review: String,
   points: Number,
   upvoters: [Schema.Types.ObjectId],

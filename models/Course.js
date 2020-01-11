@@ -5,8 +5,8 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var courseSchema = Schema( {
   name: String,
-  ownerId: ObjectId,
-  coursePin: Number,
+  ownerId: {type:ObjectId,index:true},
+  coursePin: {type:Number,index:true},
   createdAt: Date,
   gradeSheet: mongoose.Schema.Types.Mixed,
   gradesUpdateTime: Date

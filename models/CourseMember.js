@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 const ObjectId = mongoose.Schema.Types.ObjectId;
 
 var courseMemberSchema = Schema( {
-  studentId: ObjectId,
-  courseId: ObjectId,
+  studentId: {type:ObjectId,index:true},
+  courseId: {type:ObjectId,index:true},
   createdAt: Date,
 } );
 

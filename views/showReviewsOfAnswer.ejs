@@ -11,7 +11,7 @@
 
     <b>Their Answer</b>
     <small>Submission time and date:<%= answer.createdAt %> </small>
-    <pre class="bg-default"
+    <pre class="bg-warning"
          style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
          ><%= answer.answer %></pre>
     <br>
@@ -42,7 +42,7 @@
                 <b>Your Review!</b>
             <% } %>
             <br>
-            <div style="border:2px solid blue; white-space: pre-wrap; font-family:monospace; padding:1px"
+            <div style="background:rgb(120,220,255);border:2px solid blue; white-space: pre-wrap; font-family:monospace; padding:1px"
             ><%= reviews[i].review %></div>
             <br>
         </li>
@@ -50,6 +50,7 @@
     </ul>
     <hr>
     <a href="/reviewAnswers/<%= problem._id %>" class="btn btn-small btn-warning">Review others answers</a>
+    <a href="/showProblem/<%= problem._id %>" class="btn btn-small btn-danger">Back to the Problem</a>
     <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
 
 
