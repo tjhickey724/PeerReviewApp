@@ -801,7 +801,7 @@ app.get('/showTheStudentInfo/:option/:courseId',
         const id = req.params.courseId
         // get the courseInfo
         res.locals.courseInfo =
-            await Course.findOne({_id:id},'name')
+            await Course.findOne({_id:id},'name ownerId')
 
         const isTA =
             req.user.taFor &&
@@ -809,7 +809,9 @@ app.get('/showTheStudentInfo/:option/:courseId',
         const isOwner =
             req.user._id.equals(res.locals.courseInfo.ownerId)
 
-        if (!isOwner && !isTA) {
+        if (!(isOwner || isTA)) {
+          console.log('isOwner = '+isOwner)
+          console.log('isTA = '+isTA)
           res.send("only the course owner and TAs can see this page")
           return
         }
