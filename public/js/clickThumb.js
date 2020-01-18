@@ -9,6 +9,8 @@ function clickThumb(i,reviewId,userId,direction){
   const likeSpan = document.getElementById("likes"+i)
   let numLikes = parseInt(likeSpan.innerHTML)
   const c = review.getAttribute("class")
+  const cU = reviewU.getAttribute("class")
+  const cD = reviewD.getAttribute("class")
   const isU = reviewU.getAttribute("class").startsWith('fas')
   const isD = reviewD.getAttribute("class").startsWith('fas')
   const otherDirection = (direction=='U')?'D':'U'
@@ -27,7 +29,7 @@ function clickThumb(i,reviewId,userId,direction){
   switch (mode){
     case 'up/select':
       console.log("in up/select")
-      reviewU.setAttribute("class","fas"+c.substring(3))
+      reviewU.setAttribute("class","fas"+cU.substring(3))
       likeSpan.innerHTML = numLikes+1
       fetch('/thumbsU'+'/select/'+urlPath)
         .then(function(response) {
@@ -39,21 +41,21 @@ function clickThumb(i,reviewId,userId,direction){
       break
     case 'down/select':
       console.log("in down/select")
-      reviewD.setAttribute("class","fas"+c.substring(3))
+      reviewD.setAttribute("class","fas"+cD.substring(3))
       likeSpan.innerHTML = numLikes-1
       fetch('/thumbsD'+'/select/'+urlPath)
         .then(function(response) {});
       break
     case 'up/deselect':
       console.log("in up/deselect")
-      reviewU.setAttribute("class","far"+c.substring(3))
+      reviewU.setAttribute("class","far"+cU.substring(3))
       likeSpan.innerHTML = numLikes-1
       fetch('/thumbsU'+'/deselect/'+urlPath)
         .then(function(response) {});
       break
     case 'down/deselect':
       console.log("in down/deselect")
-      reviewD.setAttribute("class","far"+c.substring(3))
+      reviewD.setAttribute("class","far"+cD.substring(3))
       likeSpan.innerHTML = numLikes+1
       fetch('/thumbsD'+'/deselect/'+urlPath)
         .then(function(response) {});
