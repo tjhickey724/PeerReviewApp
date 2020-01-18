@@ -715,25 +715,39 @@ app.get('/showReviewsOfAnswer/:answerId',
     }
 )
 
-app.get('/thumbsUp/:reviewId/:userId',
+app.get('/thumbsU/:mode/:reviewId/:userId',
   async (req,res,next) => {
     let reviewId = req.params.reviewId
     let userId = req.params.userId
+    let mode = req.params.mode
+    if (mode=='select'){
+      await Review.findOneAndUpdate(
+         {_id: reviewId},
+         {$push:{upvoters:userId}})
+    }else {
+      await Review.findOneAndUpdate(
+         {_id: reviewId},
+         {$pull:{upvoters:userId}})
+    }
 
-    await Review.findOneAndUpdate(
-       {_id: reviewId},
-       {$push:{upvoters:userId}})
   res.json({result:"OK"})
   })
 
-app.get('/thumbsDown/:reviewId/:userId',
+app.get('/thumbsD/:mode/:reviewId/:userId',
   async (req,res,next) => {
     let reviewId = req.params.reviewId
     let userId = req.params.userId
+    let mode = req.params.mode
+    if (mode=='select'){
+      await Review.findOneAndUpdate(
+         {_id: reviewId},
+         {$push:{downvoters: userId}})
+    } else {
+      await Review.findOneAndUpdate(
+         {_id: reviewId},
+         {$pull:{downvoters: userId}})
+    }
 
-    await Review.findOneAndUpdate(
-       {_id: reviewId},
-       {$pull:{upvoters: userId}})
   res.json({result:"OK"})
   })
 

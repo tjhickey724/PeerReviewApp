@@ -26,36 +26,43 @@
 
           <% if (reviews[j].answerId.equals(answers[i]._id)) {
              let rev=reviews[j]
-             let numLikes = reviews[j].upvoters.length
-             let userLikes = reviews[j].upvoters.includes(user._id)
-             let fa_prefix = userLikes?"fas":"far"
+             let numLikesU = reviews[j].upvoters.length
+             let userLikesU = reviews[j].upvoters.includes(user._id)
+             let fa_prefixU = userLikesU?"fas":"far"
+             let numLikesD = reviews[j].downvoters.length
+             let userLikesD = reviews[j].downvoters.includes(user._id)
+             let fa_prefixD = userLikesD?"fas":"far"
              %>
 
             <div class="row">
               <div class="col-md-1">
               </div>
                <div class="col">
-                 <i  class="<%= fa_prefix %> fa-thumbs-up"
-                             id='<%= "review"+j %>'
-                             onclick="clickThumb(<%= j %>,'<%= reviews[j]._id %>','<%= user._id %>')"></i>
+                  <i  class="<%= fa_prefixU %> fa-thumbs-up"
+                               id='<%= "reviewU"+j %>'
+                               onclick="clickThumb(<%= j %>,'<%= reviews[j]._id %>','<%= user._id %>','U')"></i>
 
-                        <i>
+                  <i  class="<%= fa_prefixD %> fa-thumbs-down"
+                              id='<%= "reviewD"+j %>'
+                              onclick="clickThumb(<%= j %>,'<%= reviews[j]._id %>','<%= user._id %>','D')"></i>
 
-                          likes: <span id='<%="likes"+ j %>'>
-                                   <%= rev.upvoters.length %>
-                                 </span>
-                             .... grade:
-                           <%= rev.points %>/<%= problem.points %>pts
-                         </i>
-                           <% if (rev.reviewerId.equals(user._id)) {%>
-                               <span style="color:rgb(220,120,255);">YOUR REVIEW!!</span>
-                               <div style="background:rgb(220,120,255);
-                           <% } else { %>
-                               <div style="background:rgb(120,220,255);
-                           <% } %>
-                                   padding:5px; margin-bottom:10px;border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
-                                   ><%= rev.review
-                           %></div>
+                  <i>
+
+                    likes: <span id='<%="likes"+ j %>'>
+                             <%= numLikesU-numLikesD %>
+                           </span>
+                       .... grade:
+                     <%= rev.points %>/<%= problem.points %>pts
+                  </i>
+                   <% if (rev.reviewerId.equals(user._id)) {%>
+                       <span style="color:rgb(220,120,255);">YOUR REVIEW!!</span>
+                       <div style="background:rgb(220,120,255);
+                   <% } else { %>
+                       <div style="background:rgb(120,220,255);
+                   <% } %>
+                           padding:5px; margin-bottom:10px;border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
+                           ><%= rev.review
+                   %></div>
 
               </div>
             </div>

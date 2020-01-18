@@ -26,7 +26,7 @@
 
     <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
     <hr>
-    <% console.log("answers= "+answers+" answers.length>0 = "+(answers.length>0)) %>
+    
     <% if (answers.length > 0 || (answers.length==-1 && course.ownerId.equals(user._id))) { %>
         <% if (!course.ownerId.equals(user._id)) { %>
             <h2>Your Answer</h2>
