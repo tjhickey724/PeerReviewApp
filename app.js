@@ -272,7 +272,7 @@ app.post('/joinCourse',
 
       await newCourseMember.save()
 
-      res.render("showCourse")
+      res.redirect("/showCourse/"+res.locals.courseInfo._id)
 
     }
     catch(e){
