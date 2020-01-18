@@ -429,10 +429,23 @@ app.get('/showAllAnswers/:probId',
       try {
           const id = req.params.probId
           res.locals.problem = await Problem.findOne({_id:id})
-          res.locals.answers = await Answer.find({problemId:id})
-            .collation({locale:'en',strength: 2})
-            .sort({answer:1})
-          res.locals.reviews = await Review.find({problemId:id})
+          const course =
+            await Course.findOne({_id:res.locals.problem.courseId})
+          const userReviews =
+            await Review.find({problemId:id,reviewerId:req.user._id})
+          res.locals.numReviews = userReviews.length
+          res.locals.canView =
+              ((res.locals.numReviews>=5) ||
+               (req.user._id.equals(course.ownerId)))
+          if (!res.locals.canView){
+              res.locals.answers=[]
+              res.locals.reviews=[]
+          }else {
+            res.locals.answers = await Answer.find({problemId:id})
+              .collation({locale:'en',strength: 2})
+              .sort({answer:1})
+            res.locals.reviews = await Review.find({problemId:id})
+          }
           res.render('showAllAnswers')
       }
     catch(e){
@@ -501,8 +514,12 @@ async (req,res,next) => {
 
           if (x.timeSent<tooOld) {
             expiredReviews.push(x)
+            console.log("\nremoved an expired review ")
+            console.dir(x)
 
             return false
+          } else {
+            return true
           }
         })
     problem.pendingReviews = pendingReviews
@@ -520,13 +537,16 @@ async (req,res,next) => {
           tempAnswer.pendingReviewers.filter((r)=>{
             if (r.equals(x.reviewerId)) {
               tempAnswer.numReviews -= 1
+              console.log("\nremoved reviewer '+r+' from pending reviews: ")
+              console.dir(x)
               return false
             } else {
+              console.log('not removing '+r+' from pending reviewers')
               return true
             }
           }
         )
-      //tempAnswer.markModified('pendingReviewers')
+      tempAnswer.markModified('pendingReviewers')
       await tempAnswer.save()
 
     })
@@ -550,7 +570,7 @@ async (req,res,next) => {
           // we found an answer the user hasn't reviewed!
           answer.numReviews += 1 // we optimistically add 1 to numReviews
           answer.pendingReviewers.push(req.user._id)
-
+          answer.markModified('pendingReviewers')
           await answer.save()
 
           // {answerId,reviewerId,timeSent}
@@ -645,13 +665,16 @@ app.post('/saveReview/:probId/:answerId',
       await answer.save()
 
       // finally we update the pendingReviews field of the problem
-      // to remove this reviewer, if necessary
+      // to remove this reviewer on this answer, if necessary
+      // the reviewInfo might have been removed earlier if they
+      // timed out before completing their review...
       let pendingReviews=[]
       for (let i=0; i<problem.pendingReviews.length; i++){
         reviewInfo = problem.pendingReviews[i]
 
-        if (reviewInfo.reviewerId.equals(req.user._id)){
-          // don't push review back into pendingReviews
+        if (reviewInfo.answerId.equals(answer._id) &&
+            reviewInfo.reviewerId.equals(req.user._id)){
+          // don't push answer just reviewed by this user back into pendingReviews
         } else {
           pendingReviews.push(reviewInfo)
         }
@@ -822,6 +845,39 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
     catch(e){
       next(e)
     }
+  }
+)
+
+app.get('/resetNumReviews',
+  async (req, res, next) => {
+    res.redirect('/')
+    try {
+      const answers =
+          await Answer.find({})
+      answers.forEach(async (x) => {
+        const len = x.reviewers.length
+        console.log(x.numReviews+" "+len+" "+x.pendingReviewers.length)
+        x.numReviews = len
+        x.pendingReviewers = []
+        console.log(x.numReviews+" "+len+" "+x.pendingReviewers.length)
+
+        x.markModified('pendingReviewers')
+        console.dir(x._id)
+        await x.save()
+      })
+      const problems = await Problem.find({})
+      problems.forEach(async (p) => {
+        if (p.pendingReviews.length > 0){
+          p.pendingReviews = []
+          p.markModified('pendingReviews')
+          await p.save()
+        }
+      })
+    }catch(e){
+      console.log("caught an error: "+e)
+      console.dir(e)
+    }
+    res.redirect('/')
   }
 )
 

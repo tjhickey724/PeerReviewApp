@@ -40,7 +40,7 @@
         <% } %>
         <a href="/showReviewsByUser/<%= problem._id %>" class="btn btn-small btn-info">Your Reviews of other's answers</a>
         <a href="/showProblemSet/<%= problem.psetId %>" class="btn btn-small btn-primary">Back to the Problem Set</a>
-        <% if (course.ownerId.equals(user._id)) { %>
+        <% if (true || course.ownerId.equals(user._id)) { %>
             <br>
             <a href="/showAllAnswers/<%= problem._id %>" class="btn btn-small btn-danger">Show all answers</a>
         <%} %>

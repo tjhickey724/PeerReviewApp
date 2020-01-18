@@ -8,12 +8,14 @@
          style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
        ><%= problem.problemText %></div>
     <hr>
-
+    <% if (canView) { %>
     <h2>All Answers with their Reviews</h2>
     <% for(let i=0; i<answers.length; i++){ %>
         <div class="row">
           <div class="col-md-12">
             <%= answers[i].createdAt %>
+            <br>
+            <%= answers[i]._id %>
             <pre class="bg-warning"
                         style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
                     ><%= answers[i].answer %></pre>
@@ -60,8 +62,13 @@
               <% }%>
               <% } %>
 
-    <%}%>
-
+      <%} %>
+    <% } else {%>
+      <h1>More Reviews Needed</h1>
+      You have reviewed <%= numReviews %> answers,
+      but must review at least 5 before you can see
+      all of the answers and reviews for this problem.
+    <% } %>
 
 
     <hr>
