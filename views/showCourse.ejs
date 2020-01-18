@@ -3,6 +3,8 @@
     <h1><%= courseInfo.name %></h1>
     studentPin: <%= courseInfo.coursePin %>
     <br>
+    
+
 
 
 
@@ -21,13 +23,11 @@
     <% } %>
     </ul>
 <hr>
-    <% if (user._id.equals(courseInfo.ownerId)) { %>
+    <% if (isTA || user._id.equals(courseInfo.ownerId)) { %>
         <a href="/addProblemSet/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
             Add Problem Set
         </a>
-        <a href="/showAllStudentInfo/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
-            Show All Student Info
-        </a>
+
         <a href="/showStudentInfo/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
             Show Summarized Student Info
         </a>
@@ -35,6 +35,9 @@
 
     <%} %>
 
+    <a href="/showTAs/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
+        Show TAs
+    </a>
     <a href="/" class="btn btn-sm btn-danger">
         Back to Home
     </a>

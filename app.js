@@ -228,6 +228,10 @@ app.get('/showCourse/:courseId',
 
       res.locals.problemSets = await ProblemSet.find({courseId:res.locals.courseInfo._id})
 
+      res.locals.isTA =
+          req.user.taFor &&
+          req.user.taFor.includes(res.locals.courseInfo._id)
+
       res.render('showCourse')
     }
     catch(e){
@@ -799,6 +803,17 @@ app.get('/showTheStudentInfo/:option/:courseId',
         res.locals.courseInfo =
             await Course.findOne({_id:id},'name')
 
+        const isTA =
+            req.user.taFor &&
+            req.user.taFor.includes(res.locals.courseInfo._id)
+        const isOwner =
+            req.user._id.equals(res.locals.courseInfo.ownerId)
+
+        if (!isOwner && !isTA) {
+          res.send("only the course owner and TAs can see this page")
+          return
+        }
+
         // get the list of ids of students in the course
         const memberList =
             await CourseMember.find({courseId:res.locals.courseInfo._id})
@@ -854,6 +869,18 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
           await Course.findOne({_id:req.params.courseId},'name gradeSheet')
       res.locals.studentInfo =
           await User.findOne({_id:req.params.studentId})
+
+      const isTA =
+          req.user.taFor &&
+          req.user.taFor.includes(res.locals.courseInfo._id)
+      const isOwner =
+          req.user._id.equals(res.locals.courseInfo.ownerId)
+
+      if (!isOwner && !isTA && !(req.user._id.equals(req.params.studentId))) {
+        res.send("only the course owner and TAs and the student themselves can see this page")
+        return
+      }
+
       res.render("showOneStudentInfo")
     }
     catch(e){
@@ -862,21 +889,82 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
   }
 )
 
+app.post('/addTA/:courseId',
+  async (req,res,next) => {
+    try {
+      console.log("in addTA handler "+req.body.email)
+      let ta =
+        await User.findOne({googleemail:req.body.email})
+      if (ta){
+        ta.taFor = ta.taFor || []
+        ta.taFor.push(req.params.courseId)
+        ta.markModified('taFor')
+        console.log("updating ta "+ta._id)
+        console.dir(ta)
+        await ta.save()
+      }
+      res.redirect('/showTAs/'+req.params.courseId)
+    }catch(e){
+      next(e)
+    }
+  })
+
+app.post('/removeTAs/:courseId',
+async (req,res,next) => {
+  try {
+    console.log("in removeTAs handler ")
+    console.dir(req.body)
+    console.log(typeof req.body.ta)
+    if (req.body.ta == null){
+      console.log("nothing to delete")
+    } else if (typeof req.body.ta == 'string') {
+      console.log("delete "+req.body.ta)
+      await User.update({_id:req.body.ta},{$set:{taFor:[]}})
+    } else {
+      console.log("delete several:")
+      req.body.ta.forEach(async (x) => {
+        console.log('x='+x)
+        await User.update({_id:x},{$set:{taFor:[]}})
+      })
+    }
+
+
+    res.redirect('/showTAs/'+req.params.courseId)
+  }catch(e){
+    next(e)
+  }
+})
+
+app.get('/showTAs/:courseId',
+  async (req,res,next) => {
+    try{
+      res.locals.courseInfo =
+          await Course.findOne({_id:req.params.courseId},'name ownerId coursePin')
+      res.locals.tas =
+        await User.find({taFor:req.params.courseId})
+      console.log("in showTAs handler")
+
+
+      res.render('showTAs')
+    } catch(e){
+      next(e)
+    }
+
+  })
+
 app.get('/resetNumReviews',
   async (req, res, next) => {
-    res.redirect('/')
+   if (req.user.googleemail != "tjhickey@brandeis.edu"){
+    res.send('you are not allowed to do this!')
+  }else {
     try {
       const answers =
           await Answer.find({})
       answers.forEach(async (x) => {
         const len = x.reviewers.length
-        console.log(x.numReviews+" "+len+" "+x.pendingReviewers.length)
         x.numReviews = len
         x.pendingReviewers = []
-        console.log(x.numReviews+" "+len+" "+x.pendingReviewers.length)
-
         x.markModified('pendingReviewers')
-        console.dir(x._id)
         await x.save()
       })
       const problems = await Problem.find({})
@@ -892,6 +980,7 @@ app.get('/resetNumReviews',
       console.dir(e)
     }
     res.redirect('/')
+   }
   }
 )
 
