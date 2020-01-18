@@ -232,6 +232,8 @@ app.get('/showCourse/:courseId',
           req.user.taFor &&
           req.user.taFor.includes(res.locals.courseInfo._id)
 
+
+
       res.render('showCourse')
     }
     catch(e){
@@ -868,7 +870,7 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
   async (req, res, next) => {
     try {
       res.locals.courseInfo =
-          await Course.findOne({_id:req.params.courseId},'name gradeSheet')
+          await Course.findOne({_id:req.params.courseId},'name ownerId gradeSheet')
       res.locals.studentInfo =
           await User.findOne({_id:req.params.studentId})
 
