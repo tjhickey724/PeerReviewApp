@@ -317,7 +317,8 @@ app.post('/saveProblemSet/:courseId',
       res.locals.problemSets =
         await ProblemSet.find({courseId:res.locals.courseInfo._id})
 
-      res.render("showCourse")
+      res.redirect("/showCourse/"+res.locals.courseInfo._id)
+
     }
     catch(e){
       next(e)
