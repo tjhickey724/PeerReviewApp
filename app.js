@@ -25,6 +25,9 @@ const CourseMember = require('./models/CourseMember')
 session = require("express-session"),
 bodyParser = require("body-parser"),
 flash = require('connect-flash')
+
+const MongoStore = require('connect-mongo')(session)
+
 // END OF AUTHENTICATION MODULES
 
 const mongoose = require( 'mongoose' );
@@ -66,10 +69,12 @@ app.use(express.static(path.join(__dirname, 'public')));
      HERE ARE THE AUTHENTICATION ROUTES
 **************************************************************************/
 
+//app.use(session({ secret: 'zzbbyanana',resave: false,  saveUninitialized: false }));
 app.use(session(
-  { secret: 'zzbbyanana',
-    resave: false,
-    saveUninitialized: false }));
+  {secret: 'zzbbyanana',
+   resave: false,
+   saveUninitialized: false,
+   store:new MongoStore({mongooseConnection: mongoose.connection})}))
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
