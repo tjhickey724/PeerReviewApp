@@ -74,6 +74,7 @@ app.use(session(
   {secret: 'zzbbyanana',
    resave: false,
    saveUninitialized: false,
+   cookie:{maxAge:3600000},
    store:new MongoStore({mongooseConnection: mongoose.connection})}))
 app.use(flash());
 app.use(passport.initialize());
