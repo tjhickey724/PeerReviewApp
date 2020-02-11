@@ -12,6 +12,7 @@ var problemSchema = Schema( {
   rubric: String,
   pendingReviews: mongoose.Schema.Types.Mixed,
   createdAt: Date,
+  allowAnswers: Boolean,
 } );
 /*
   pendingReviews is a list of JSON objects of the form:

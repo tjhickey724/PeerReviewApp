@@ -1,3 +1,7 @@
+// Start/restart this with
+// pm2 start bin/www -i 3
+// pm2 restart all
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -74,7 +78,7 @@ app.use(session(
   {secret: 'zzbbyanana',
    resave: false,
    saveUninitialized: false,
-   cookie:{maxAge:3600000},
+   cookie:{maxAge:24*60*60*1000}, // allow login for one day...
    store:new MongoStore({mongooseConnection: mongoose.connection})}))
 app.use(flash());
 app.use(passport.initialize());
@@ -435,6 +439,26 @@ app.get('/showProblem/:probId',
       }
 )
 
+app.get('/startProblem/:probId',
+   async (req,res,next) => {
+      const result = await Problem.updateOne({_id:req.params.probId},{allowAnswers:true})
+      res.redirect('/showProblem/'+req.params.probId)
+})
+
+app.get('/stopProblem/:probId',
+   async (req,res,next) => {
+      const result = await Problem.updateOne({_id:req.params.probId},{allowAnswers:false})
+      res.redirect('/showProblem/'+req.params.probId)
+})
+
+
+app.get('/updateSchema',
+  async (req,res,next) => {
+    const result = await Problem.updateMany({},{allowAnswers:true})
+    console.dir(result)
+    res.redirect("/")
+  }
+)
 
 
 app.get('/showAllAnswers/:probId',
