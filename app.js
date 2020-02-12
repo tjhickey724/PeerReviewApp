@@ -371,6 +371,7 @@ app.post('/saveProblem/:psetId',
             points: req.body.points,
             rubric: req.body.rubric,
             pendingReviews: [],
+            allowAnswers:true,
             createdAt: new Date()
            }
           )
