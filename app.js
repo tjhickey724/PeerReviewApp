@@ -187,8 +187,17 @@ app.get('/createCourse',
 // rename this to /createCourse and update the ejs form
 app.post('/createNewCourse',
   async ( req, res, next ) => {
+    console.dir(req.body)
+    if (!req.user.googleemail.endsWith("@brandeis.edu")){
+      res.send("You must log in with an @brandeis.edu account to create a class. <a href='/logout'>Logout</a>")
+      return
+    } else if (!(req.body.norobot=='on' && req.body.robot==undefined)) {
+      res.send("no robots allowed!")
+      return
+    }
     try {
       let coursePin =  await getCoursePin()
+      console.dir(req.user)
       let newCourse = new Course(
        {
         name: req.body.courseName,
@@ -385,7 +394,8 @@ app.post('/saveProblem/:psetId',
         res.locals.courseInfo =
             await Course.findOne({_id:res.locals.problemSet.courseId},
                                   'ownerId')
-        res.render("showProblemSet")
+        //res.render("showProblemSet")
+        res.redirect("/showProblemSet/"+psetId)
       }
     catch(e){
       next(e)
