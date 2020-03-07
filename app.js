@@ -188,7 +188,7 @@ app.get('/createCourse',
 app.post('/createNewCourse',
   async ( req, res, next ) => {
     console.dir(req.body)
-    if (!req.user.googleemail.endsWith("@brandeis.edu")){
+    if (false  && !req.user.googleemail.endsWith("@brandeis.edu")){
       res.send("You must log in with an @brandeis.edu account to create a class. <a href='/logout'>Logout</a>")
       return
     } else if (!(req.body.norobot=='on' && req.body.robot==undefined)) {
