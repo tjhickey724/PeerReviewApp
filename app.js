@@ -193,7 +193,9 @@ app.get('/stats',
         await Answer.find().count();
     let reviewCount =
         await Review.find().count();
-    res.render("stats.ejs",{courseCount,userCount,problemCount,answerCount,reviewCount})
+    let courses =
+        await Course.find({},{name:1})
+    res.render("stats.ejs",{courseCount,userCount,problemCount,answerCount,reviewCount,courses,googleemail:req.user.googleemail})
 })
 
 app.use(isLoggedIn)
