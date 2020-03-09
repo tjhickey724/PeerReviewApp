@@ -17,6 +17,7 @@ To run this app locally you need to
 
 ## auth.js format
 The config/auth.js file has the form
+``` javascript
 module.exports = {
     'googleAuth' : {
         'clientID': 'your user clientID',
@@ -24,3 +25,5 @@ module.exports = {
         'callbackURL'   : 'http://127.0.0.1:6500/login/authorized'
     }
 };
+```
+
