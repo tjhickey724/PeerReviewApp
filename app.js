@@ -160,6 +160,8 @@ app.get('/',
 
       if (!req.user) next()
 
+
+
       let coursesOwned =
           await Course.find({ownerId:req.user._id},'name')
       res.locals.coursesOwned = coursesOwned
@@ -178,6 +180,21 @@ app.get('/',
     }
 
 )
+
+app.get('/stats',
+  async (req,res,next) => {
+    let courseCount =
+        await Course.find().count();
+    let userCount =
+        await User.find().count();
+    let problemCount =
+        await Problem.find().count();
+    let answerCount =
+        await Answer.find().count();
+    let reviewCount =
+        await Review.find().count();
+    res.render("stats.ejs",{courseCount,userCount,problemCount,answerCount,reviewCount})
+})
 
 app.use(isLoggedIn)
 

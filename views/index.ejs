@@ -9,7 +9,7 @@
         <h2>Promoting Engaged Learning</h2>
     </div>
     <% if (!loggedIn){ %>
-        <h2>You must login to use the Peer Review App:
+        <h2>You must login through Brandeis to use the Peer Review App:
          <a class="btn btn-lg btn-danger" href="/auth/google"> Login</a>
          </h2>
     <% } else {%>
@@ -18,6 +18,8 @@
         <input type="input" name="coursePin" placeholder="7 digit pin"s>
         or
         <a href="/createCourse">Create a new course</a>
+        or
+        <a href="/stats">View usage statistics</a>
         </form>
 
         <hr>
