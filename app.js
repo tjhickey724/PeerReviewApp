@@ -181,6 +181,15 @@ app.get('/',
 
 app.use(isLoggedIn)
 
+app.use((req,res,next) => {
+  if (req.user.googleemail.endsWith("@brandeis.edu")){
+    next()
+  } else {
+    res.send("You must have a Brandeis email to use this Peer Review App server\n "+
+             "You can set up your own server. The code is at http://github.com/tjhickey724/PeerReviewApp branch v2.1 ")
+  }
+})
+
 app.get('/createCourse',
       (req,res) => res.render('createCourse'))
 
