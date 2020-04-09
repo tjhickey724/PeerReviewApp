@@ -1,12 +1,17 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
 
-
+  <h2>Grading </h2>
+      <% if (user.taFor && (user.taFor).indexOf(problem.courseId)>=0) { %>
+            <%= student.googlename %> <%= student.googleemail %>
+      <% } %>
+    <hr>
     <h3><%= problem.description %></h3>
     <b>The Question</b>
     <div class="bg-default" style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"><%= problem.problemText %></div>
     <% if (answer) { %>
         <hr>
+
         <b>Their Answer</b>
         <small>Submission time and date:<%= answer.createdAt %> </small>
         <pre class="bg-default"

@@ -388,6 +388,39 @@ app.get('/showProblemSet/:psetId',
   }
 )
 
+app.get('/gradeProblemSet/:psetId',
+  async ( req, res, next ) => {
+    const psetId = req.params.psetId
+    res.locals.psetId = psetId
+    res.locals.problemSet =
+        await ProblemSet.findOne({_id:psetId})
+    res.locals.problems =
+        await Problem.find({psetId:psetId})
+    res.locals.courseInfo =
+        await Course.findOne({_id:res.locals.problemSet.courseId},
+                              'ownerId')
+    console.log("looking up students")
+    const memberList =
+        await CourseMember.find({courseId:res.locals.courseInfo._id})
+    res.locals.students = memberList.map((x)=>x.studentId)
+    //console.log(res.locals.students)
+    console.log("getting student info")
+    res.locals.studentsInfo =
+        await User.find({_id:{$in:res.locals.students}})
+    //console.log(res.locals.studentsInfo)
+    const taList =
+       await User.find({taFor:res.locals.courseInfo._id})
+    const taIds = taList.map(x => x._id)
+    console.log('taIds='+JSON.stringify(taIds))
+    const taReviews =
+       await Review.find({psetId:psetId,reviewerId:{$in:taIds}})
+    console.log("found "+taReviews.length+" reviews by "+taList.length+" tas")
+    res.locals.taReviews = taReviews
+
+    res.render('gradeProblemSet')
+  }
+)
+
 app.get('/addProblem/:psetId',
       (req,res) => res.render("addProblem",{psetId:req.params.psetId})
     )
@@ -572,6 +605,37 @@ app.post('/saveAnswer/:probId',
   }
 )
 
+app.get('/gradeProblem/:probId/:studentId',
+async (req,res,next) => {
+  try{
+    const probId = req.params.probId
+    const studentId = req.params.studentId
+
+    let problem = await Problem.findOne({_id:probId})
+    res.locals.student = await User.findOne({_id:studentId})
+
+
+    let answer =
+        await Answer.find({problemId:probId,studentId:studentId})
+
+    // and we need to add it to the problem.pendingReviews
+    res.locals.answer = answer
+    res.locals.problem = problem
+    res.locals.numReviewsByMe =
+        await Review.find({problemId:problem._id,
+                           answerId:answer._id,
+                           reviewerId:req.user._id}).length
+
+
+    res.render("reviewAnswer")
+  }
+  catch(e){
+    next(e)
+  }
+ }
+)
+
+
 
 app.get('/reviewAnswers/:probId',
 async (req,res,next) => {
@@ -670,6 +734,7 @@ async (req,res,next) => {
 
     // and we need to add it to the problem.pendingReviews
     res.locals.answer = answer
+    res.locals.student = {googlename:"",googleemail:""}
     res.locals.problem = problem
     res.locals.numReviewsByMe =
         await Review.find({problemId:problem._id,
@@ -1026,37 +1091,35 @@ app.get('/showTAs/:courseId',
 
   })
 
-app.get('/resetNumReviews',
-  async (req, res, next) => {
-   if (req.user.googleemail != "tjhickey@brandeis.edu"){
-    res.send('you are not allowed to do this!')
-  }else {
-    try {
-      const answers =
-          await Answer.find({})
-      answers.forEach(async (x) => {
-        const len = x.reviewers.length
-        x.numReviews = len
-        x.pendingReviewers = []
-        x.markModified('pendingReviewers')
-        await x.save()
-      })
-      const problems = await Problem.find({})
-      problems.forEach(async (p) => {
-        if (p.pendingReviews.length > 0){
-          p.pendingReviews = []
-          p.markModified('pendingReviews')
-          await p.save()
-        }
-      })
-    }catch(e){
-      console.log("caught an error: "+e)
-      console.dir(e)
+
+  // add the studentId to each Review ...
+  app.get('/updateReviews',
+    async (req, res, next) => {
+     if (req.user.googleemail != "tjhickey@brandeis.edu"){
+      res.send('you are not allowed to do this!')
+    }else {
+      try {
+        let counter=0
+        const reviews = await Review.find({})
+        reviews.forEach(async (r) => {
+          // lookup the answer, get the studentId,
+          // and add it to the review, and save it...
+          answer = await Answer.findOne({_id:r.answerId})
+          console.log(counter+": "+r._id+" "+answer.studentId)
+          counter += 1
+          r.studentId = answer.studentId
+          await r.save()
+        })
+      }catch(e){
+        console.log("caught an error: "+e)
+        console.dir(e)
+      }
+      res.send('all done')
+     }
     }
-    res.redirect('/')
-   }
-  }
-)
+  )
+
+
 
 
 // catch 404 and forward to error handler
@@ -1074,6 +1137,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 
 function createGradeSheet(students, problems, answers, reviews){

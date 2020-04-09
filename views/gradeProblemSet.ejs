@@ -1,0 +1,71 @@
+<%- include('bootheader') -%>
+<%- include('menubar') -%>
+    <h1><%= problemSet.name %></h1>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <% for(i = 0; i<= problems.length-1; i++){  %>
+                        <th> <a href="/showProblem/<%= problems[i]._id %>">
+                            P<%= i %>
+                            <%= problems[i]._id %>
+                        </a></th>
+                <% } %>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(i = 0; i< studentsInfo.length; i++){  %>
+                <tr>
+                    <td><%= studentsInfo[i].googleemail %>
+                        <%= studentsInfo[i]._id %>
+                    </td>
+                    <% for(j = 0; j<= problems.length-1; j++){
+                        // find the scores of the reviews of this problem
+                     const grades =
+                        taReviews
+                          .filter(
+                           r =>{
+                               let zz = (r.problemId.equals(problems[j]._id))
+                                   && (r.studentId.equals(studentsInfo[i]._id))
+                                   //console.log(`${zz} ${i} ${j} ${r.problemId} ${problems[j]._id} ${studentsInfo[i]._id} ${r.studentId}`)
+
+                               return(zz)
+                           })
+
+
+
+                        %>
+                            <td> <a href="/gradeProblem/<%= problems[j]._id %>/<%= studentsInfo[i]._id  %>">
+                                <%= JSON.stringify(grades.map((r) => r.points)) %>
+                                
+                            </a></td>
+                    <% } %>
+                    <td> 0 </td>
+                </tr>
+            <% } %>
+
+        </tbody>
+    </table>
+
+
+
+    <hr>
+    <% if (courseInfo.ownerId.equals(user._id)){ %>
+        <a class="btn btn-sm btn-success" href="/addProblem/<%= psetId %>">Add Problem</a>
+    <% } %>
+    <a href="/showCourse/<%= problemSet.courseId %>" class="btn btn-sm btn-primary">Back to List of Problem Sets</a>
+    <% if ((user.taFor).indexOf(problemSet.courseId)>=0) { %>
+      <a class="btn btn-sm btn-warning" href="/gradeProblemSet/<%= problemSet._id %>">Grade Problem Set </a>
+    <% } %>
+
+    <% for(let k=0; k<taReviews.length; k++) { %>
+            <% r = taReviews[k] %>
+            <%= JSON.stringify([r.problemId, r.studentId,r.points]) %>
+            <br> <%= JSON.stringify(r) %>
+            <hr>
+        <% } %>
+
+
+<%- include('bootfooter') -%>
