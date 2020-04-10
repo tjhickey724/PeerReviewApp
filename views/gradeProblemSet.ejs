@@ -5,6 +5,7 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
+                <th>N </th>
                 <th>Student</th>
                 <% for(i = 0; i<= problems.length-1; i++){  %>
                         <th> <a href="/showProblem/<%= problems[i]._id %>">
@@ -20,7 +21,8 @@
                 psetScore = 0
                 %>
                 <tr>
-                    <td><%= studentsInfo[i].googleemail %>
+                    <td><%= i %></td>
+                    <td> <%= studentsInfo[i].googleemail %>
 
                     </td>
                     <% for(j = 0; j<= problems.length-1; j++){

@@ -408,7 +408,7 @@ app.get('/gradeProblemSet/:psetId',
     //console.log(res.locals.students)
     console.log("getting student info")
     res.locals.studentsInfo =
-        await User.find({_id:{$in:res.locals.students}})
+        await User.find({_id:{$in:res.locals.students}},{},{sort:{googleemail:1}})
     //console.log(res.locals.studentsInfo)
     const taList =
        await User.find({taFor:res.locals.courseInfo._id})
@@ -863,10 +863,10 @@ app.get('/showReviewsOfAnswer/:answerId',
       res.locals.answer = await Answer.findOne({_id:id})
       res.locals.problem = await Problem.findOne({_id:res.locals.answer.problemId})
       res.locals.student = await User.findOne({_id:res.locals.answer.studentId})
-      res.locals.reviews =
-          await Review.find({answerId:id})
-                      .sort({points:'asc',review:'asc'})
-
+      res.locals.reviews = await Review.find({answerId:id})
+                            .sort({points:'asc',review:'asc'})
+      const taList = await User.find({taFor:res.locals.problem.courseId})
+      res.locals.taList = taList.map(x => x._id)
       res.render("showReviewsOfAnswer")
       }
     catch(e){
