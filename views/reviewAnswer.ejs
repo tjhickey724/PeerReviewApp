@@ -2,7 +2,7 @@
 <%- include('menubar') -%>
 
   <h2>Grading </h2>
-      <% if (user.taFor && (user.taFor).indexOf(problem.courseId)>=0) { %>
+      <% if (student && user.taFor && (user.taFor).indexOf(problem.courseId)>=0) { %>
             <%= student.googlename %> <%= student.googleemail %>
       <% } %>
     <hr>
@@ -53,7 +53,7 @@
         <div>
     <% } else { %>
         <hr>
-        <b class="bg-danger" style="padding:10px">You have reviewed all answers submitted so far </b>
+        <b class="bg-danger" style="padding:10px">There is nothing for you to review </b>
 
     <% } %>
     <hr>

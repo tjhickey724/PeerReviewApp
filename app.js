@@ -201,7 +201,7 @@ app.get('/stats',
 app.use(isLoggedIn)
 
 app.use((req,res,next) => {
-  if (req.user.googleemail.endsWith("@brandeis.edu")){
+  if (true || req.user.googleemail.endsWith("@brandeis.edu")){
     next()
   } else {
     res.send("You must have a Brandeis email to use this Peer Review App server\n "+
@@ -396,6 +396,8 @@ app.get('/gradeProblemSet/:psetId',
         await ProblemSet.findOne({_id:psetId})
     res.locals.problems =
         await Problem.find({psetId:psetId})
+    res.locals.answers =
+        await Answer.find({psetId:psetId})
     res.locals.courseInfo =
         await Course.findOne({_id:res.locals.problemSet.courseId},
                               'ownerId')
@@ -415,6 +417,7 @@ app.get('/gradeProblemSet/:psetId',
     const taReviews =
        await Review.find({psetId:psetId,reviewerId:{$in:taIds}})
     console.log("found "+taReviews.length+" reviews by "+taList.length+" tas")
+
     res.locals.taReviews = taReviews
 
     res.render('gradeProblemSet')
@@ -616,18 +619,31 @@ async (req,res,next) => {
 
 
     let answer =
-        await Answer.find({problemId:probId,studentId:studentId})
+        await Answer.findOne({problemId:probId,studentId:studentId})
 
+    console.log("answer= "+JSON.stringify(answer))
     // and we need to add it to the problem.pendingReviews
     res.locals.answer = answer
     res.locals.problem = problem
-    res.locals.numReviewsByMe =
+
+    let myReviews = []
+    if (answer!=undefined){
+      myReviews =
         await Review.find({problemId:problem._id,
                            answerId:answer._id,
-                           reviewerId:req.user._id}).length
+                           reviewerId:req.user._id})
+    }
+    res.locals.numReviewsByMe = myReviews.length
+    res.locals.alreadyReviewed = (myReviews.length>0)
 
 
-    res.render("reviewAnswer")
+    console.log('\n\n\nmy reviews='+JSON.stringify(myReviews))
+    console.log(res.locals.numReviewsByMe)
+    if (res.locals.alreadyReviewed){
+      res.redirect('/showReviewsOfAnswer/'+answer._id)
+    } else {
+      res.render("reviewAnswer")
+    }
   }
   catch(e){
     next(e)
@@ -736,6 +752,7 @@ async (req,res,next) => {
     res.locals.answer = answer
     res.locals.student = {googlename:"",googleemail:""}
     res.locals.problem = problem
+    res.locals.alreadyReviewed = false
     res.locals.numReviewsByMe =
         await Review.find({problemId:problem._id,
                            reviewerId:req.user._id}).length
@@ -773,6 +790,7 @@ app.post('/saveReview/:probId/:answerId',
         psetId:problem.psetId,
         problemId:problem._id,
         answerId:req.params.answerId,
+        studentId:answer.studentId,
         review:req.body.review,
         points:req.body.points,
         upvoters: [],
@@ -844,6 +862,7 @@ app.get('/showReviewsOfAnswer/:answerId',
       const id = req.params.answerId
       res.locals.answer = await Answer.findOne({_id:id})
       res.locals.problem = await Problem.findOne({_id:res.locals.answer.problemId})
+      res.locals.student = await User.findOne({_id:res.locals.answer.studentId})
       res.locals.reviews =
           await Review.find({answerId:id})
                       .sort({points:'asc',review:'asc'})

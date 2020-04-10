@@ -2,8 +2,12 @@
 <%- include('menubar') -%>
 
 <script type="text/javascript" src="/js/clickThumb.js"></script>
-
-
+    <hr>
+    <h3 class="bg-danger">
+    <% if (user.taFor && (user.taFor).indexOf(problem.courseId)>=0) { %>
+          <%= student.googlename %> <%= student.googleemail %>
+    <% } %>
+    </h3>
     <h1>Problem</h1>
     <h3><%= problem.description %></h3>
     <b>The Question</b>
