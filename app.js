@@ -1002,7 +1002,7 @@ app.get('/showTheStudentInfo/:option/:courseId',
 
         await Course.findOneAndUpdate(
                 {_id:courseId},
-                {$set:{gradeSheet:gradeSheet,gradesUpdateTime:new Date()}},
+                {$set:{gradeSheet:{},gradesUpdateTime:new Date()}},
                 {new:true})
 
 
@@ -1024,7 +1024,7 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
   async (req, res, next) => {
     try {
       res.locals.courseInfo =
-          await Course.findOne({_id:req.params.courseId},'name ownerId gradeSheet')
+          await Course.findOne({_id:req.params.courseId},'name ownerId')
       res.locals.studentInfo =
           await User.findOne({_id:req.params.studentId})
 
@@ -1038,6 +1038,35 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
         res.send("only the course owner and TAs and the student themselves can see this page")
         return
       }
+
+      // get the list of ids of students in the course
+      const memberList =
+          await CourseMember.find({courseId:res.locals.courseInfo._id})
+      res.locals.students = memberList.map((x)=>x.studentId)
+
+      res.locals.studentsInfo =
+          await User.find({_id:{$in:res.locals.students}})
+
+      const courseId = res.locals.courseInfo._id
+      res.locals.answers =
+          await Answer.find({courseId:courseId})
+
+      res.locals.problems =
+          await Problem.find({courseId:courseId})
+
+      res.locals.reviews =
+          await Review.find({courseId:courseId})
+
+      const gradeSheet =
+         createGradeSheet(
+           res.locals.studentsInfo,
+           res.locals.problems,
+           res.locals.answers,
+           res.locals.reviews)
+
+
+      res.locals.gradeSheet = gradeSheet
+
 
       res.render("showOneStudentInfo")
     }
@@ -1138,7 +1167,29 @@ app.get('/showTAs/:courseId',
     }
   )
 
-
+  app.get('/removeGradeSheets',
+    async (req, res, next) => {
+     if (req.user.googleemail != "tjhickey@brandeis.edu"){
+      res.send('you are not allowed to do this!')
+    }else {
+      try {
+        let counter=0
+        const courses = await Course.find({})
+        courses.forEach(async (c) => {
+          // lookup the answer, get the studentId,
+          // and add it to the review, and save it...
+          c.gradeSheet = {}
+          console.log('updated course :'+JSON.stringify(c))
+          await c.save()
+        })
+      }catch(e){
+        console.log("caught an error: "+e)
+        console.dir(e)
+      }
+      res.send('all done')
+     }
+    }
+  )
 
 
 // catch 404 and forward to error handler
