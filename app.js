@@ -401,26 +401,31 @@ app.get('/gradeProblemSet/:psetId',
     res.locals.courseInfo =
         await Course.findOne({_id:res.locals.problemSet.courseId},
                               'ownerId')
-    console.log("looking up students")
+    //console.log("looking up students")
     const memberList =
         await CourseMember.find({courseId:res.locals.courseInfo._id})
     res.locals.students = memberList.map((x)=>x.studentId)
     //console.log(res.locals.students)
-    console.log("getting student info")
+    //console.log("getting student info")
     res.locals.studentsInfo =
         await User.find({_id:{$in:res.locals.students}},{},{sort:{googleemail:1}})
     //console.log(res.locals.studentsInfo)
     const taList =
        await User.find({taFor:res.locals.courseInfo._id})
     const taIds = taList.map(x => x._id)
-    console.log('taIds='+JSON.stringify(taIds))
+    //console.log('taIds='+JSON.stringify(taIds))
     const taReviews =
        await Review.find({psetId:psetId,reviewerId:{$in:taIds}})
-    console.log("found "+taReviews.length+" reviews by "+taList.length+" tas")
+    //console.log("found "+taReviews.length+" reviews by "+taList.length+" tas")
 
     res.locals.taReviews = taReviews
-
-    res.render('gradeProblemSet')
+    console.log(JSON.stringify(req.user._id))
+    console.log(JSON.stringify(taIds))
+    if (taIds.filter(x=>x.equals(req.user._id)).length>0){
+      res.render('gradeProblemSet')
+    } else {
+      res.send("You are not allowed to grade problem sets.")
+    }
   }
 )
 
@@ -849,6 +854,28 @@ app.post('/saveReview/:probId/:answerId',
       res.redirect('/showReviewsOfAnswer/'+answer._id)
       // we can now redirect them to review more answers
       // res.redirect('/reviewAnswers/'+req.params.probId)
+    }
+    catch(e){
+      next(e)
+    }
+  }
+)
+
+app.post('/removeReviews',
+  async ( req, res, next ) => {
+    try {
+      const reviews = req.body.deletes
+      console.log(`reviews=${reviews}`)
+      console.log(`type(reviews)=${typeof(reviews)}`)
+      if (!reviews){
+        res.send("nothing to delete")
+      } else if (typeof(reviews)=="string"){
+        await Review.findOneAndDelete({_id:reviews})
+        res.send(`deleted review with id ${reviews}`)
+      } else {
+        let r = await Review.deleteMany({_id:{$in:reviews}})
+        res.send(`deleted reviews with ids ${JSON.stringify(reviews)}`)
+      }
     }
     catch(e){
       next(e)
