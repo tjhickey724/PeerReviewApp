@@ -1,7 +1,7 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
     <h1><%= problemSet.name %></h1>
-
+    <% jsonGrades = [] %>
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
@@ -18,7 +18,8 @@
         </thead>
         <tbody>
             <% for(i = 0; i< studentsInfo.length; i++){
-                psetScore = 0
+                let psetScore = 0
+                let jsonRow = {email:studentsInfo[i].googleemail, name:studentsInfo[i].googlename,grades:[]}
                 %>
                 <tr>
                     <td><%= i %></td>
@@ -55,10 +56,14 @@
 
                         %>
                             <td>
-                                <% if (studentAnswers.length == 0){ %>
+                                <% if (studentAnswers.length == 0){
+                                    jsonRow.grades.push(0)
+                                    %>
                                     No answer to review
 
-                               <% } else if (!answerId) { %>
+                               <% } else if (!answerId) {
+                                    jsonRow.grades.push(0)
+                                   %>
                                     <a href="/gradeProblem/<%= problems[j]._id %>/<%= studentsInfo[i]._id  %>">
                                     No TA reviews yet
                                     </a>
@@ -71,6 +76,7 @@
                                                 scores.reduce((a,b) => a + b, 0)/scores.length
                                                 )
                                        psetScore += avgScore
+                                       jsonRow.grades.push(avgScore)
                                     %>
                                     <%= JSON.stringify(scores) %> <br>
                                     <%=  avgScore %>
@@ -78,12 +84,26 @@
                                 <% } %>
                             </td>
                     <% } %>
-                    <td> <%= psetScore %> </td>
+                    <td> <% jsonRow.grades.push(psetScore)
+                            jsonGrades.push(jsonRow)%>
+                         <%= psetScore %> </td>
                 </tr>
             <% } %>
 
         </tbody>
+
     </table>
+<hr>
+    <pre>
+
+<% for (let i=0; i<jsonGrades.length; i++){
+            let row = jsonGrades[i]
+            let gs = row.grades
+%><%= row.email %>, <%= row.name %> <% for(let j=0; j<gs.length; j++){ %>, <%= gs[j] %> <% } %>
+<% } %>
+    </pre>
+
+    <%= JSON.stringify(jsonGrades) %>
 
 
 
