@@ -215,7 +215,7 @@ app.get('/createCourse',
 // rename this to /createCourse and update the ejs form
 app.post('/createNewCourse',
   async ( req, res, next ) => {
-    console.dir(req.body)
+    //console.dir(req.body)
     if (false  && !req.user.googleemail.endsWith("@brandeis.edu")){
       res.send("You must log in with an @brandeis.edu account to create a class. <a href='/logout'>Logout</a>")
       return
@@ -225,7 +225,7 @@ app.post('/createNewCourse',
     }
     try {
       let coursePin =  await getCoursePin()
-      console.dir(req.user)
+      //console.dir(req.user)
       let newCourse = new Course(
        {
         name: req.body.courseName,
@@ -419,8 +419,8 @@ app.get('/gradeProblemSet/:psetId',
     //console.log("found "+taReviews.length+" reviews by "+taList.length+" tas")
 
     res.locals.taReviews = taReviews
-    console.log(JSON.stringify(req.user._id))
-    console.log(JSON.stringify(taIds))
+    //console.log(JSON.stringify(req.user._id))
+    //console.log(JSON.stringify(taIds))
     if (taIds.filter(x=>x.equals(req.user._id)).length>0){
       res.render('gradeProblemSet')
     } else {
@@ -535,7 +535,7 @@ app.get('/stopProblem/:probId',
 app.get('/updateSchema',
   async (req,res,next) => {
     const result = await Problem.updateMany({},{allowAnswers:true})
-    console.dir(result)
+    //console.dir(result)
     res.redirect("/")
   }
 )
@@ -626,7 +626,7 @@ async (req,res,next) => {
     let answer =
         await Answer.findOne({problemId:probId,studentId:studentId})
 
-    console.log("answer= "+JSON.stringify(answer))
+    //console.log("answer= "+JSON.stringify(answer))
     // and we need to add it to the problem.pendingReviews
     res.locals.answer = answer
     res.locals.problem = problem
@@ -642,8 +642,8 @@ async (req,res,next) => {
     res.locals.alreadyReviewed = (myReviews.length>0)
 
 
-    console.log('\n\n\nmy reviews='+JSON.stringify(myReviews))
-    console.log(res.locals.numReviewsByMe)
+    //console.log('\n\n\nmy reviews='+JSON.stringify(myReviews))
+    //console.log(res.locals.numReviewsByMe)
     if (res.locals.alreadyReviewed){
       res.redirect('/showReviewsOfAnswer/'+answer._id)
     } else {
@@ -675,8 +675,8 @@ async (req,res,next) => {
 
           if (x.timeSent<tooOld) {
             expiredReviews.push(x)
-            console.log("\nremoved an expired review ")
-            console.dir(x)
+            //console.log("\nremoved an expired review ")
+            //console.dir(x)
 
             return false
           } else {
@@ -698,11 +698,11 @@ async (req,res,next) => {
           tempAnswer.pendingReviewers.filter((r)=>{
             if (r.equals(x.reviewerId)) {
               tempAnswer.numReviews -= 1
-              console.log("\nremoved reviewer '+r+' from pending reviews: ")
-              console.dir(x)
+              //console.log("\nremoved reviewer '+r+' from pending reviews: ")
+              //console.dir(x)
               return false
             } else {
-              console.log('not removing '+r+' from pending reviewers')
+              //console.log('not removing '+r+' from pending reviewers')
               return true
             }
           }
@@ -723,6 +723,8 @@ async (req,res,next) => {
     let answer = null
     while (i<answers.length){
       answer = answers[i]
+      //console.log(`user=${req.user._id}`)
+      //console.log(`answers[${i}] = ${JSON.stringify(answer)}`)
       if (!answer.reviewers.find((x)=>(x.equals(req.user._id)))
           &&
           !answer.pendingReviewers.find((x)=>(x.equals(req.user._id)))
@@ -746,6 +748,7 @@ async (req,res,next) => {
           break
         }
       else {
+        //console.log("reviewed this one!")
         answer=null
       }
       i++
@@ -864,24 +867,57 @@ app.post('/saveReview/:probId/:answerId',
 app.post('/removeReviews',
   async ( req, res, next ) => {
     try {
-      const reviews = req.body.deletes
-      console.log(`reviews=${reviews}`)
-      console.log(`type(reviews)=${typeof(reviews)}`)
-      if (!reviews){
+      /*
+      We need to remove delete the Review, but also
+      to remove the reviewerId from the list of reviewers
+      for the answer...
+      */
+      let deletes = req.body.deletes
+      //console.log(`deletes=${deletes}`)
+      //console.log(`type(deletes)=${typeof(deletes)}`)
+      let reviews = null
+
+      if (!deletes){
         res.send("nothing to delete")
-      } else if (typeof(reviews)=="string"){
-        await Review.findOneAndDelete({_id:reviews})
-        res.send(`deleted review with id ${reviews}`)
+        return
+      } else if (typeof(deletes)=="string"){
+        let review = await Review.findOne({_id:deletes})
+        reviews = [review]
       } else {
-        let r = await Review.deleteMany({_id:{$in:reviews}})
-        res.send(`deleted reviews with ids ${JSON.stringify(reviews)}`)
+        reviews = await Review.find({_id:{$in:deletes}})
       }
+      //console.log("reviews="+JSON.stringify(reviews))
+      let answerId = reviews[0].answerId
+      let reviewerIds = reviews.map(r=>r.reviewerId)
+      let answer = await Answer.findOne({_id:answerId})
+
+      //console.log(`answer= ${JSON.stringify(answer)}`)
+      //console.log(`answer.reviewers=${JSON.stringify(answer.reviewers)}`)
+      //console.log(`reviewerIds= ${JSON.stringify(reviewerIds)}`)
+      //console.log(answer.reviewers.indexOf(reviewerIds[0]))
+      const newReviewerIds = removeElements(answer.reviewers,reviewerIds)
+      //console.log('nri = '+JSON.stringify(newReviewerIds))
+      answer.reviewers = newReviewerIds
+      await answer.save()
+      await Review.deleteMany({_id:{$in: deletes}})
+      res.send("just updating answer ...")
     }
     catch(e){
       next(e)
     }
   }
 )
+
+function removeElements(slist, rems){
+  for (let i=0; i<rems.length; i++){
+     slist = slist.filter(s =>
+       {const z = (!s.equals(rems[i]))
+         //console.log(`${s} ${rems[i]} ${z}`)
+         return z})
+      //console.log(`${i}  ${JSON.stringify(slist)}`)
+   }
+   return slist
+}
 
 app.get('/showReviewsOfAnswer/:answerId',
   async ( req, res, next ) => {
@@ -993,8 +1029,8 @@ app.get('/showTheStudentInfo/:option/:courseId',
             req.user._id.equals(res.locals.courseInfo.ownerId)
 
         if (!(isOwner || isTA)) {
-          console.log('isOwner = '+isOwner)
-          console.log('isTA = '+isTA)
+          //console.log('isOwner = '+isOwner)
+          //console.log('isTA = '+isTA)
           res.send("only the course owner and TAs can see this page")
           return
         }
@@ -1106,15 +1142,15 @@ app.get('/showOneStudentInfo/:courseId/:studentId',
 app.post('/addTA/:courseId',
   async (req,res,next) => {
     try {
-      console.log("in addTA handler "+req.body.email)
+      //console.log("in addTA handler "+req.body.email)
       let ta =
         await User.findOne({googleemail:req.body.email})
       if (ta){
         ta.taFor = ta.taFor || []
         ta.taFor.push(req.params.courseId)
         ta.markModified('taFor')
-        console.log("updating ta "+ta._id)
-        console.dir(ta)
+        //console.log("updating ta "+ta._id)
+        //console.dir(ta)
         await ta.save()
       }
       res.redirect('/showTAs/'+req.params.courseId)
@@ -1126,18 +1162,18 @@ app.post('/addTA/:courseId',
 app.post('/removeTAs/:courseId',
 async (req,res,next) => {
   try {
-    console.log("in removeTAs handler ")
-    console.dir(req.body)
-    console.log(typeof req.body.ta)
+    //console.log("in removeTAs handler ")
+    //console.dir(req.body)
+    //console.log(typeof req.body.ta)
     if (req.body.ta == null){
-      console.log("nothing to delete")
+      //console.log("nothing to delete")
     } else if (typeof req.body.ta == 'string') {
-      console.log("delete "+req.body.ta)
+      //console.log("delete "+req.body.ta)
       await User.update({_id:req.body.ta},{$set:{taFor:[]}})
     } else {
-      console.log("delete several:")
+      //console.log("delete several:")
       req.body.ta.forEach(async (x) => {
-        console.log('x='+x)
+        //console.log('x='+x)
         await User.update({_id:x},{$set:{taFor:[]}})
       })
     }
@@ -1156,7 +1192,7 @@ app.get('/showTAs/:courseId',
           await Course.findOne({_id:req.params.courseId},'name ownerId coursePin')
       res.locals.tas =
         await User.find({taFor:req.params.courseId})
-      console.log("in showTAs handler")
+      //console.log("in showTAs handler")
 
 
       res.render('showTAs')
@@ -1172,7 +1208,12 @@ app.get('/showTAs/:courseId',
     async (req, res, next) => {
      if (req.user.googleemail != "tjhickey@brandeis.edu"){
       res.send('you are not allowed to do this!')
+      //console.log("did we get here???  Yes we did!!")
+      return
     }else {
+      res.send("we aren't doing this anymore!")
+      //console.log("did we get here???  Yes we did!!")
+      return
       try {
         let counter=0
         const reviews = await Review.find({})
@@ -1180,10 +1221,43 @@ app.get('/showTAs/:courseId',
           // lookup the answer, get the studentId,
           // and add it to the review, and save it...
           answer = await Answer.findOne({_id:r.answerId})
-          console.log(counter+": "+r._id+" "+answer.studentId)
+          //console.log(counter+": "+r._id+" "+answer.studentId)
           counter += 1
           r.studentId = answer.studentId
           await r.save()
+        })
+      }catch(e){
+        console.log("caught an error: "+e)
+        console.dir(e)
+      }
+      res.send('all done')
+     }
+    }
+  )
+
+  // add the studentId to each Review ...
+  app.get('/updateReviews2',
+    async (req, res, next) => {
+     if (req.user.googleemail != "tjhickey@brandeis.edu"){
+      res.send('you are not allowed to do this!')
+    }else {
+      try {
+        // for each answer, find all of the reviews of that answer
+        // create the reviewers field of the answer and set it
+        let counter=0
+        const answers = await Answer.find({})
+        answers.forEach(async (a) => {
+          try {
+            //  answer, get the studentId,
+            // and add it to the review, and save it...
+            reviews = await Review.find({answerId:a._id})
+            reviewers = reviews.map(r=>r.reviewerId)
+            //console.log(a._id+" "+JSON.stringify(reviewers))
+            a.reviewers = reviewers
+            await a.save()
+          }catch(e){
+            console.log("caught an error updating an answer: "+e)
+          }
         })
       }catch(e){
         console.log("caught an error: "+e)
@@ -1206,7 +1280,7 @@ app.get('/showTAs/:courseId',
           // lookup the answer, get the studentId,
           // and add it to the review, and save it...
           c.gradeSheet = {}
-          console.log('updated course :'+JSON.stringify(c))
+          //console.log('updated course :'+JSON.stringify(c))
           await c.save()
         })
       }catch(e){
