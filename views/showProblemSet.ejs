@@ -5,7 +5,7 @@
     <% for(i = 0; i<= problems.length-1; i++){  %>
         <li>
             <a href="/showProblem/<%= problems[i]._id %>">
-                <%= problems[i].description %>
+                <%= problems[i].description || "no name" %>
             </a>
         </li>
     <% } %>
