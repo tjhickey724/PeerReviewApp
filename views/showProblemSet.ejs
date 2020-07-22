@@ -1,6 +1,6 @@
 <%- include('bootheader') -%>
 <%- include('menubar') -%>
-    <h1><%= problemSet.name %></h1>
+    <h1><%= problemSet.name.trim() || "Problem Set" %></h1>
     <ul>
     <% for(i = 0; i<= problems.length-1; i++){  %>
         <li>
