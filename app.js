@@ -275,6 +275,50 @@ app.get('/showCourse/:courseId',
 
       res.locals.problemSets = await ProblemSet.find({courseId:res.locals.courseInfo._id})
 
+      // next we create maps to find the number of problems and user's answers
+      // in each problem set so the user will know if they have finished a problemset
+      let problems = await Problem.find({courseId:res.locals.courseInfo._id})
+      let myAnswers = await Answer.find(
+           {courseId:res.locals.courseInfo._id,
+            studentId:req.user._id})
+
+
+      let problemMap = new Map()
+      let answerMap = new Map()
+      for (let problem of problems) {
+        let count = problemMap.get(problem.psetId.toString())
+        if (count) {
+          problemMap.set(problem.psetId.toString(),count+1)
+        } else {
+          problemMap.set(problem.psetId.toString(),1)
+        }
+      }
+      for (let answer of myAnswers) {
+        let count = answerMap.get(answer.psetId.toString())
+        if (count) {
+          answerMap.set(answer.psetId.toString(),count+1)
+        } else {
+          answerMap.set(answer.psetId.toString(),1)
+        }
+      }
+      res.locals.problemMap = problemMap
+      res.locals.answerMap = answerMap
+
+      let myReviews = await Review.find(
+        {courseId:res.locals.courseInfo._id,
+         studentId:req.user._id})
+      res.locals.myReviews = myReviews
+      let thumbsUp = 0
+      let thumbsDown=0
+      for (let r of myReviews) {
+        thumbsUp += r.upvoters.length
+        thumbsDown += r.downvoters.length
+      }
+      res.locals.thumbsUp = thumbsUp
+      res.locals.thumbsDown = thumbsDown
+
+
+
       res.locals.isTA =
           req.user.taFor &&
           req.user.taFor.includes(res.locals.courseInfo._id)
@@ -375,6 +419,7 @@ app.post('/saveProblemSet/:courseId',
 
 app.get('/showProblemSet/:psetId',
   async ( req, res, next ) => {
+    console.log("in showProblemSet")
     const psetId = req.params.psetId
     res.locals.psetId = psetId
     res.locals.problemSet =
@@ -384,6 +429,13 @@ app.get('/showProblemSet/:psetId',
     res.locals.courseInfo =
         await Course.findOne({_id:res.locals.problemSet.courseId},
                               'ownerId')
+    res.locals.myAnswers =
+        await Answer.find({psetId:psetId,studentId:req.user._id})
+    res.locals.pids = res.locals.myAnswers.map((x)=>{
+      return x.problemId.toString()
+    console.log("pids = ")
+    console.dir(res.locals.pids)
+    })
     res.render('showProblemSet')
   }
 )
@@ -552,7 +604,7 @@ app.get('/showAllAnswers/:probId',
             await Review.find({problemId:id,reviewerId:req.user._id})
           res.locals.numReviews = userReviews.length
           res.locals.canView =
-              ((res.locals.numReviews>=5) ||
+              ((res.locals.numReviews>=2) ||
                (req.user._id.equals(course.ownerId)))
           if (!res.locals.canView){
               res.locals.answers=[]
@@ -563,6 +615,9 @@ app.get('/showAllAnswers/:probId',
               .sort({answer:1})
             res.locals.reviews = await Review.find({problemId:id})
           }
+          res.locals.isTA =
+              req.user.taFor &&
+              req.user.taFor.includes(course._id)
           res.render('showAllAnswers')
       }
     catch(e){
@@ -1071,6 +1126,8 @@ app.get('/showTheStudentInfo/:option/:courseId',
 
         if (req.params.option == 'all'){
           res.render("showAllStudentInfo")
+        } else if (req.params.option == 'csv'){
+          res.render("showStudentInfoCSV")
         } else {
           res.render("showStudentInfo")
         }

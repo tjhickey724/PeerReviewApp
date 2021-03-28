@@ -8,6 +8,7 @@
          style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
        ><%= problem.problemText %></div>
     <hr>
+
     <% if (canView) { %>
     <h2>All Answers with their Reviews</h2>
     <% for(let i=0; i<answers.length; i++){ %>
@@ -73,7 +74,7 @@
     <% } else {%>
       <h1>More Reviews Needed</h1>
       You have reviewed <%= numReviews %> answers,
-      but must review at least 5 before you can see
+      but must review at least 2 before you can see
       all of the answers and reviews for this problem.
     <% } %>
 

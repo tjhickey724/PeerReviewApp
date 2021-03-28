@@ -15,13 +15,28 @@
     <% for(i = 0; i<= problemSets.length-1; i++){  %>
         <li>
 
-            <a href="/showProblemSet/<%= problemSets[i]._id %>">
+            <a href="/showProblemSet/<%= problemSets[i]._id %>"
+                <% if ( answerMap.get(problemSets[i]._id.toString()) ==
+                       problemMap.get(problemSets[i]._id.toString())
+                ) {%>
+                style="color:green"
+                <% } else {%>
+                style="color:red"
+                <% } %>
+            >
+
                 <%= problemSets[i].name.trim() || "problem set" %>
             </a>
-                <i><small><%= problemSets[i].createdAt %></small></i>
+
+                (<%= answerMap.get(problemSets[i]._id.toString()) || 0
+                  %>/<%=
+                     problemMap.get(problemSets[i]._id.toString()) || 0 %>)
+
+
         </li>
     <% } %>
     </ul>
+
 <hr>
     <% if (isTA || user._id.equals(courseInfo.ownerId)) { %>
         <a href="/addProblemSet/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
@@ -34,6 +49,11 @@
     <% } else { %>
 
     <%} %>
+    <br>
+    Number of reviews I've made: <%= myReviews.length %>
+    with <%= thumbsUp %> thumbs up and
+    <%= thumbsDown %> thumb downs <br>
+    <br><hr><br>
 
     <a href="/showTAs/<%= courseInfo._id %>" class="btn btn-sm btn-danger">
         Show TAs

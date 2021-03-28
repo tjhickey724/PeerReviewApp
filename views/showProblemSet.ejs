@@ -4,8 +4,15 @@
     <ul>
     <% for(i = 0; i<= problems.length-1; i++){  %>
         <li>
-            <a href="/showProblem/<%= problems[i]._id %>">
+            <a href="/showProblem/<%= problems[i]._id %>"
+                <% if (pids.includes(problems[i]._id.toString())) {%>
+                    style="color:green"
+                 <% } else { %>
+                    style="color:red"
+                 <% }%>
+                 >
                 <%= problems[i].description || "no name" %>
+
             </a>
         </li>
     <% } %>
