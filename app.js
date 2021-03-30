@@ -699,7 +699,7 @@ async (req,res,next) => {
 
     //console.log('\n\n\nmy reviews='+JSON.stringify(myReviews))
     //console.log(res.locals.numReviewsByMe)
-    if (res.locals.alreadyReviewed){
+    if (true || res.locals.alreadyReviewed){
       res.redirect('/showReviewsOfAnswer/'+answer._id)
     } else {
       res.render("reviewAnswer")
@@ -821,7 +821,8 @@ async (req,res,next) => {
                            reviewerId:req.user._id}).length
 
 
-    res.render("reviewAnswer")
+    //res.render("reviewAnswer")
+    res.redirect('/showReviewsOfAnswer/'+answer._id)
   }
   catch(e){
     next(e)
@@ -918,6 +919,99 @@ app.post('/saveReview/:probId/:answerId',
     }
   }
 )
+
+
+/*  saveReview
+  when we save a review we need to create a new review document
+  but also update the corresponding answer and problem documents
+  to store the new information about number of reviews and pending reviews
+  This is used when we generate an answer for a user to review
+*/
+app.post('/saveReview2/:probId/:answerId',
+
+async ( req, res, next ) => {
+  try {
+
+    const problem =
+        await Problem.findOne({_id:req.params.probId})
+
+    const answer =
+        await Answer.findOne({_id:req.params.answerId})
+
+    const newReview = new Review(
+     {
+      reviewerId:req.user._id,
+      courseId:problem.courseId,
+      psetId:problem.psetId,
+      problemId:problem._id,
+      answerId:req.params.answerId,
+      studentId:answer.studentId,
+      review:req.body.review,
+      points:req.body.points,
+      upvoters: [],
+      downvoters: [],
+      createdAt: new Date()
+     }
+    )
+
+    await newReview.save()
+
+    // next we update the reviewers info in the answer object
+    answer.reviewers.push(req.user._id)
+    answer.numReviews += 1
+
+    let pendingReviewers = []
+
+    for (let i=0; i<answer.pendingReviewers.length; i++){
+      const reviewer = answer.pendingReviewers[i]
+
+      if (reviewer.equals(req.user._id)){
+        answer.numReviews -= 1
+
+        // because we incremented it when we sent the review to user
+      } else {
+        pendingReviewers.push(reviewer)
+      }
+    }
+    answer.pendingReviewers = pendingReviewers
+    answer.markModified('pendingReviewers')
+
+    await answer.save()
+
+    // finally we update the pendingReviews field of the problem
+    // to remove this reviewer on this answer, if necessary
+    // the reviewInfo might have been removed earlier if they
+    // timed out before completing their review...
+    let pendingReviews=[]
+    for (let i=0; i<problem.pendingReviews.length; i++){
+      reviewInfo = problem.pendingReviews[i]
+
+      if (reviewInfo.answerId.equals(answer._id) &&
+          reviewInfo.reviewerId.equals(req.user._id)){
+        // don't push answer just reviewed by this user back into pendingReviews
+      } else {
+        pendingReviews.push(reviewInfo)
+      }
+    }
+
+    problem.pendingReviews = pendingReviews
+
+    problem.markModified('pendingReviews')
+
+
+    await problem.save()
+
+    //res.redirect('/showReviewsOfAnswer/'+answer._id)
+    res.redirect('/reviewAnswers/'+problem._id)
+    // we can now redirect them to review more answers
+    // res.redirect('/reviewAnswers/'+req.params.probId)
+  }
+  catch(e){
+    next(e)
+  }
+}
+)
+
 
 app.post('/removeReviews',
   async ( req, res, next ) => {
