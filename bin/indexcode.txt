@@ -1,0 +1,61 @@
+db.answers.createIndex( { studentId: 1, problemId: 1 }, { unique: true } )
+db.reviews.createIndex( { answerId: 1, reviewerId: 1 }, { unique: true } )
+
+db.answer.aggregate([
+   {$group: {
+       _id: {CERT: "$CERT"},
+       uniqueIds: {$addToSet: "$_id"},
+       count: {$sum: 1}
+       }
+   },
+   {$match: {
+       count: {"$gt": 1}
+       }
+   },
+   {$sort: {
+       count: -1
+       }
+   }
+]);
+
+var cur = db.answers.aggregate([
+  {$group: {
+    _id: {studentId:"$studentId",problemId:"$problemId"},
+    uniqueIds: {$addToSet: "$_id"},
+    count: {$sum: 1}
+  }},
+  {$match: {
+      count: {"$gt": 1}
+      }
+  },
+  {$sort: {
+      count: -1
+      }
+  }
+])
+
+while (cur.hasNext()) {
+    var doc = cur.next();
+    var index = 1;
+    while (index < doc.uniqueIds.length) {
+        db.answers.remove(doc.uniqueIds[index]);
+        index = index + 1;
+    }
+}
+
+
+var cur = db.reviews.aggregate([
+  {$group: {
+    _id: {answerId:"$answerId",reviewerId:"$reviewerId"},
+    uniqueIds: {$addToSet: "$_id"},
+    count: {$sum: 1}
+  }},
+  {$match: {
+      count: {"$gt": 1}
+      }
+  },
+  {$sort: {
+      count: -1
+      }
+  }
+])

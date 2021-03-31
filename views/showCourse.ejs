@@ -16,7 +16,7 @@
         <li>
 
             <a href="/showProblemSet/<%= problemSets[i]._id %>"
-                <% if ( answerMap.get(problemSets[i]._id.toString()) ==
+                <% if ( answerMap.get(problemSets[i]._id.toString()) >=
                        problemMap.get(problemSets[i]._id.toString())
                 ) {%>
                 style="color:green"

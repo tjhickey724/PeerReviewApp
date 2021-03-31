@@ -1419,6 +1419,7 @@ app.get('/showTAs/:courseId',
     }
   )
 
+
   app.get('/removeGradeSheets',
     async (req, res, next) => {
      if (req.user.googleemail != "tjhickey@brandeis.edu"){
@@ -1499,7 +1500,7 @@ function createGradeSheet(students, problems, answers, reviews){
           ['answers'][review.answerId]
       //z['reviews'] = z['reviews']||[]
       z['reviews'].push(review)
-    } catch(e){
+    } catch(error){
       console.log("Error in createGradeSheet-2s: "+error.message+" "+error)
 
 
