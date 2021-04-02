@@ -83,7 +83,9 @@ app.use(session(
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }));
+
 
 
 
@@ -822,7 +824,11 @@ async (req,res,next) => {
 
 
     //res.render("reviewAnswer")
-    res.redirect('/showReviewsOfAnswer/'+answer._id)
+    if (answer) {
+      res.redirect('/showReviewsOfAnswer/'+answer._id)
+    } else {
+      res.render('reviewAnswer')
+    }
   }
   catch(e){
     next(e)
@@ -840,6 +846,8 @@ app.post('/saveReview/:probId/:answerId',
 
   async ( req, res, next ) => {
     try {
+      console.log("in saveReview")
+      console.dir(req.body)
 
       const problem =
           await Problem.findOne({_id:req.params.probId})
@@ -931,6 +939,11 @@ app.post('/saveReview2/:probId/:answerId',
 
 async ( req, res, next ) => {
   try {
+
+    console.log("in saveReview2")
+    console.dir(req.body)
+    console.dir(req.headers)
+    console.dir(req.method)
 
     const problem =
         await Problem.findOne({_id:req.params.probId})
@@ -1086,6 +1099,51 @@ app.get('/showReviewsOfAnswer/:answerId',
       }
     }
 )
+
+app.post('/giveGoodGrade/:probId/:answerId',
+  async (req,res,next) => {
+
+    let answerId = req.params.answerId
+    let userId = req.params.userId
+    let review = req.body.review
+    let points = req.body.points
+    console.log("in giveGoodGrade")
+    console.log(review+" "+points)
+    console.log("req.body=")
+    console.dir(req.body)
+
+
+    const problem =
+        await Problem.findOne({_id:req.params.probId})
+
+    const answer =
+        await Answer.findOne({_id:req.params.answerId})
+
+    const newReview = new Review(
+     {
+      reviewerId:req.user._id,
+      courseId:problem.courseId,
+      psetId:problem.psetId,
+      problemId:problem._id,
+      answerId:req.params.answerId,
+      studentId:answer.studentId,
+      review:req.body.review,
+      points:req.body.points,
+      upvoters: [],
+      downvoters: [],
+      createdAt: new Date()
+     }
+    )
+
+    await newReview.save()
+
+    answer.reviewers.push(req.user._id)
+    answer.numReviews += 1
+
+    answer.save()
+
+    res.send("testing giveGoodGrade")
+  })
 
 app.get('/thumbsU/:mode/:reviewId/:userId',
   async (req,res,next) => {
@@ -1481,20 +1539,32 @@ function createGradeSheet(students, problems, answers, reviews){
     try {
 
       answerList[answer._id]= answer
+      if (answer==undefined){
+        console.log('answer undefined a='+a)
+      }else if (!('studentId' in answer)){
+        console.log('answer.studentId undefined. answer =')
+        console.dir(answer)
+      }
       // it is possible that a TA will not be a student
       // so we need to create a
       gradeSheet[answer.studentId] =
           gradeSheet[answer.studentId] || {status:'non-student',student:'non-student',answers:{}}
       gradeSheet[answer.studentId]['answers'][answer._id]
         ={answer:answer, reviews:[]}
-    } catch(e){
+    } catch(error){
       console.log("Error in createGradeSheet: "+error.message+" "+error)
+      console.log(error)
     }
   }
 
   for (let r in reviews) {
     let review = reviews[r]
     try {
+      // the problem is that review.answerId might correspond to an answer
+      // that I deleted!  but there is another duplicate with the same
+      // review.studentId and same review.problemId, so I may need to redesign.
+      // I could create an updateReviews route that would update all
+      // review.answerIds based on the studentId and problemId
       let z =
         gradeSheet[answerList[review.answerId].studentId]
           ['answers'][review.answerId]
@@ -1502,7 +1572,8 @@ function createGradeSheet(students, problems, answers, reviews){
       z['reviews'].push(review)
     } catch(error){
       console.log("Error in createGradeSheet-2s: "+error.message+" "+error)
-
+      console.log("error.lineNumber = "+error.linenNumber)
+      console.log("stack: "+error.stack)
 
     }
   }

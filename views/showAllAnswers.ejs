@@ -16,7 +16,23 @@
           <div class="col-md-12">
             <%= answers[i].createdAt %>
             <br>
-            <%= answers[i]._id %>
+
+            <% // need some code to decide if this should appear or not
+              //console.log(user._id+"   "+JSON.stringify(answers[i].reviewers))
+              if (!(answers[i].reviewers.includes(user._id))){
+            %>
+            <div id="grader_<%=i%>">
+
+            <i  class="<%= "far" %> fa-thumbs-up"
+                            id="cga_<%= i %>"
+                            onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',<%= problem.points%>)"></i>
+            <a href="/showReviewsOfAnswer/<%= answers[i]._id %>"
+               target="_blank">grade it</a>
+            <i  class="<%= "far" %> fa-thumbs-down"
+                            id="cga_<%= i %>"
+                            onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',0)"></i>
+            </div>
+            <% } %>
             <pre class="bg-warning"
                         style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
                     ><%= answers[i].answer %></pre>
@@ -55,9 +71,12 @@
                        .... grade:
                      <%= rev.points %>/<%= problem.points %>pts
                   </i>
-                   <% if (rev.reviewerId.equals(user._id)) {%>
+                  <% if (rev.points==0) { %>
+                      <div style="background:rgb(255,120,120);
+                  <% }else if (rev.reviewerId.equals(user._id)) {%>
                        <span style="color:rgb(220,120,255);">YOUR REVIEW!!</span>
                        <div style="background:rgb(220,120,255);
+
                    <% } else { %>
                        <div style="background:rgb(120,220,255);
                    <% } %>

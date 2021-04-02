@@ -63,3 +63,27 @@ function clickThumb(i,reviewId,userId,direction){
   }
 
 }
+
+function clickGoodAnswer(i,answerId,problemId,points){
+  console.log(answerId+"/"+problemId+" "+i+" "+points)
+  /*
+    This should send a message to the server to have it
+    create a positive review for this person.
+    I should do a post command sending the
+    userId, answerId, review, and points
+  */
+  document.getElementById("grader_"+i).style.visibility="hidden"
+
+  let urlPath = problemId+"/"+answerId
+  let review = "Good"
+  if (points==0) {review = "No, please see a TA to see why this is wrong..."}
+  fetch('/giveGoodGrade/'+urlPath,
+      {
+       headers:{
+         "Content-Type":"application/json"
+        },
+       body:JSON.stringify({review:review,points:points}),
+       method:"POST",
+     })
+    .then(function(response) {console.log(response)});
+}
