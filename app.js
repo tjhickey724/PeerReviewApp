@@ -1270,6 +1270,7 @@ app.get('/showTheStudentInfo/:option/:courseId',
 
         res.locals.gradeSheet = gradeSheet
 
+        // this is not needed!!
         await Course.findOneAndUpdate(
                 {_id:courseId},
                 {$set:{gradeSheet:{},gradesUpdateTime:new Date()}},

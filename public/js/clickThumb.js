@@ -72,7 +72,8 @@ function clickGoodAnswer(i,answerId,problemId,points){
     I should do a post command sending the
     userId, answerId, review, and points
   */
-  document.getElementById("grader_"+i).style.visibility="hidden"
+  let thumbs=document.getElementsByClassName("grader_"+i)
+  for (let x of thumbs){ x.style.visibility="hidden"}
 
   let urlPath = problemId+"/"+answerId
   let review = "Good"

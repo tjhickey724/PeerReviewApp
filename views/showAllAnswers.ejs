@@ -16,22 +16,24 @@
           <div class="col-md-12">
             <%= answers[i].createdAt %>
             <br>
+            <% if (isTA) {%>
+              <div>
+              <% if (!(answers[i].reviewers.includes(user._id))){  %>
+                  <i  class="<%= "far" %> fa-thumbs-up grader_<%=i%>"
+                                  id="cga_<%= i %>"
+                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',<%= problem.points%>)"></i>
+                  <a href="/showReviewsOfAnswer/<%= answers[i]._id %>"
+                     target="_blank">grade it</a>
+                  <i  class="<%= "far" %> fa-thumbs-down grader_<%=i%>"
+                                  id="cga_<%= i %>"
+                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',0)"></i>
 
-            <% // need some code to decide if this should appear or not
-              //console.log(user._id+"   "+JSON.stringify(answers[i].reviewers))
-              if (!(answers[i].reviewers.includes(user._id))){
-            %>
-            <div id="grader_<%=i%>">
 
-            <i  class="<%= "far" %> fa-thumbs-up"
-                            id="cga_<%= i %>"
-                            onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',<%= problem.points%>)"></i>
-            <a href="/showReviewsOfAnswer/<%= answers[i]._id %>"
-               target="_blank">grade it</a>
-            <i  class="<%= "far" %> fa-thumbs-down"
-                            id="cga_<%= i %>"
-                            onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',0)"></i>
-            </div>
+                <% } else { %>
+                  <a href="/showReviewsOfAnswer/<%= answers[i]._id %>"
+                     target="_blank">regrade it</a>
+                <% } %>
+              </div>
             <% } %>
             <pre class="bg-warning"
                         style="border:thin solid black; white-space: pre-wrap; font-family:monospace; padding:10px"
