@@ -1247,6 +1247,13 @@ app.get('/showTheStudentInfo/:option/:courseId',
             await CourseMember.find({courseId:res.locals.courseInfo._id})
         res.locals.students = memberList.map((x)=>x.studentId)
 
+        // student status is a map from id to status
+        // we can use this to filter student based on their statue
+        // e.g. enrolled, dropped, ta, guest, owner, ...
+        // we will need a page to see all students and edit their statuses
+        res.locals.studentStatus = new Map()
+        memberList.map((x)=>{res.locals.studentStatus.set(x.studentId,x.status)})
+
         res.locals.studentsInfo =
             await User.find({_id:{$in:res.locals.students}})
 

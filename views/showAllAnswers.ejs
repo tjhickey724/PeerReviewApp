@@ -19,14 +19,20 @@
             <% if (isTA) {%>
               <div>
               <% if (!(answers[i].reviewers.includes(user._id))){  %>
-                  <i  class="<%= "far" %> fa-thumbs-up grader_<%=i%>"
+                  <button  class="grader_<%=i%>"
                                   id="cga_<%= i %>"
-                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',<%= problem.points%>)"></i>
-                  <a href="/showReviewsOfAnswer/<%= answers[i]._id %>"
+                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',<%= problem.points%>)"><%= problem.points%></button>
+                  <button  class="grader_<%=i%>"
+                                  id="cga_<%= i %>"
+                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',<%= problem.points-1%>)"><%= problem.points-1%></button>
+                  <a  href="/showReviewsOfAnswer/<%= answers[i]._id %>"
                      target="_blank">grade it</a>
-                  <i  class="<%= "far" %> fa-thumbs-down grader_<%=i%>"
+                   <button  class="grader_<%=i%>"
+                                   id="cga_<%= i %>"
+                                   onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',1)">1</button>
+                  <button  class="grader_<%=i%>"
                                   id="cga_<%= i %>"
-                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',0)"></i>
+                                  onclick="clickGoodAnswer(<%= i %>,'<%= answers[i]._id %>','<%= answers[i].problemId %>',0)">0</button>
 
 
                 <% } else { %>

@@ -76,8 +76,9 @@ function clickGoodAnswer(i,answerId,problemId,points){
   for (let x of thumbs){ x.style.visibility="hidden"}
 
   let urlPath = problemId+"/"+answerId
-  let review = "Good"
-  if (points==0) {review = "No, please see a TA to see why this is wrong..."}
+  let review = ""
+  if (points==0) {review = ""}
+  if (points==1) {review = ""}
   fetch('/giveGoodGrade/'+urlPath,
       {
        headers:{
