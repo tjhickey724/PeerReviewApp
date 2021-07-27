@@ -157,6 +157,7 @@ function isLoggedIn(req, res, next) {
 
 
 app.get('/',
+    isLoggedIn,
     async ( req, res, next ) => {
 
 
@@ -176,6 +177,10 @@ app.get('/',
       let coursesTaken =
           await Course.find({_id:{$in:res.locals.registeredCourses}},'name')
       res.locals.coursesTaken = coursesTaken
+
+      let coursesTAing =
+          await Course.find({_id:{$in:req.user.taFor}})
+      res.locals.coursesTAing = coursesTAing
 
       res.locals.title = "PRA"
       res.render('index');
@@ -1276,13 +1281,12 @@ app.get('/showTheStudentInfo/:option/:courseId',
 
 
         res.locals.gradeSheet = gradeSheet
-
-        // this is not needed!!
+/*
         await Course.findOneAndUpdate(
                 {_id:courseId},
                 {$set:{gradeSheet:{},gradesUpdateTime:new Date()}},
                 {new:true})
-
+*/
 
         if (req.params.option == 'all'){
           res.render("showAllStudentInfo")
