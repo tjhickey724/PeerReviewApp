@@ -10,12 +10,13 @@
     <hr>
 
     <% if (canView) { %>
-    <h2>All Answers with their Reviews</h2>
+    <h2>All <%= answers.length %> Answers with  <%= reviews.length %> Reviews, total</h2>
     <% for(let i=0; i<answers.length; i++){ %>
-        <div class="row">
+        <div class="row" style="padding-top:20px; margin-top:20px; border-top:thick solid black">
           <div class="col-md-12">
             <%= answers[i].createdAt %>
             <br>
+            <h3>ANSWER</h3>
             <% if (isTA) {%>
               <div>
               <% if (!(answers[i].reviewers.includes(user._id))){  %>
@@ -47,10 +48,13 @@
                     ><%= answers[i].answer %></pre>
           </div>
         </div>
+        <h3> REVIEWS</h3>
+        <% let numReviews=0 %>
 
         <% for (let j=0; j<reviews.length; j++){ %>
 
           <% if (reviews[j].answerId.equals(answers[i]._id)) {
+             numReviews += 1
              let rev=reviews[j]
              let numLikesU = reviews[j].upvoters.length
              let userLikesU = reviews[j].upvoters.includes(user._id)
@@ -112,6 +116,7 @@
             </div>
               <% }%>
               <% } %>
+              <% if (numReviews==0) {%> <b>no reviews yet</b> <%}%>
 
       <%} %>
     <% } else {%>
