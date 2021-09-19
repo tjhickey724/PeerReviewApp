@@ -625,6 +625,8 @@ app.get('/showAllAnswers/:probId',
           res.locals.isTA =
               req.user.taFor &&
               req.user.taFor.includes(course._id)
+          const taList = await User.find({taFor:res.locals.problem.courseId})
+          res.locals.taList = taList.map(x => x._id)
           res.render('showAllAnswers')
       }
     catch(e){

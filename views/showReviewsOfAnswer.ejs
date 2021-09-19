@@ -4,7 +4,7 @@
 <script type="text/javascript" src="/js/clickThumb.js"></script>
     <hr>
     <h3 class="bg-danger">
-    <% let userIsTA = user.taFor && (user.taFor).indexOf(problem.courseId)>=0
+    <% let userIsTA = false && user.taFor && (user.taFor).indexOf(problem.courseId)>=0
        if (userIsTA) {
            %>
           <%= student.googlename %> <%= student.googleemail %>
@@ -42,7 +42,9 @@
         let taReviewer = taList.filter(x=> (x.equals(reviews[i].reviewerId)))
         let isTAreview = taReviewer.length==1
         %>
-        <li>
+        <li><% if (isTAreview) {%>
+            <b>REVIEW by TA</b>
+            <% } %>
             <% if (userIsTA){%>
             <input type="checkbox" name='deletes' value="<%= reviews[i]._id%>">
             <% } %>
