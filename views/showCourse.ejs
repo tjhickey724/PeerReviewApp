@@ -13,8 +13,12 @@
 <b>Problem Sets</b>
     <ul>
     <% for(i = 0; i<= problemSets.length-1; i++){  %>
-        <li>
-
+          <% if ((problemSets[i].visible != false) ||
+               (courseInfo.ownerId==user.id)) {%>
+       <li>
+           <% if (problemSets[i].visible == false) {%>
+               (hidden)
+           <%}%>
             <a href="/showProblemSet/<%= problemSets[i]._id %>"
                 <% if ( answerMap.get(problemSets[i]._id.toString()) >=
                        problemMap.get(problemSets[i]._id.toString())
@@ -31,9 +35,9 @@
                 (<%= answerMap.get(problemSets[i]._id.toString()) || 0
                   %>/<%=
                      problemMap.get(problemSets[i]._id.toString()) || 0 %>)
+            </li>
+          <% } %>
 
-
-        </li>
     <% } %>
     </ul>
 
