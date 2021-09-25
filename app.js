@@ -447,6 +447,40 @@ app.get('/showProblemSet/:psetId',
   }
 )
 
+app.get('/editProblemSet/:psetId',
+  async ( req, res, next ) => {
+    const psetId = req.params.psetId
+    res.locals.psetId = psetId
+    res.locals.problemSet =
+        await ProblemSet.findOne({_id:psetId})
+    res.locals.problems =
+        await Problem.find({psetId:psetId})
+    res.locals.courseInfo =
+        await Course.findOne({_id:res.locals.problemSet.courseId},
+                              'ownerId')
+    res.render('editProblemSet')
+  }
+)
+
+app.post('/updateProblemSet/:psetId',
+  async ( req, res, next ) => {
+    try {
+      const id = req.params.psetId
+      const pset = await ProblemSet.findOne({_id:id})
+      console.log('id='+id)
+      pset.name=req.body.name
+      pset.visible = (req.body.visible=='visible')
+      await pset.save()
+
+      res.redirect("/showProblemSet/"+id)
+
+    }
+    catch(e){
+      next(e)
+    }
+  }
+)
+
 app.get('/gradeProblemSet/:psetId',
   async ( req, res, next ) => {
     const psetId = req.params.psetId
