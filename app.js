@@ -32,7 +32,10 @@ const MongoStore = require('connect-mongo')(session)
 
 const mongoose = require( 'mongoose' );
 
-mongoose.connect( 'mongodb://localhost/pra_V2_0', { useNewUrlParser: true } );
+mongoose.connect( 'mongodb://localhost/pra_V2_0', 
+  { useNewUrlParser: true, 
+    useCreateIndex: true,
+    useUnifiedTopology: true } );
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
@@ -152,8 +155,16 @@ function isLoggedIn(req, res, next) {
 app.get('/',
     async ( req, res, next ) => {
 
+      console.log('in app.get(/)')
+      if (!req.user) {
+        res.redirect('/login')
+        return;
+      }
 
-      if (!req.user) next()
+      console.log('req.user = ');
+      console.dir(req.user);
+      console.dir(!req.user);
+
 
       let coursesOwned =
           await Course.find({ownerId:req.user._id},'name')
